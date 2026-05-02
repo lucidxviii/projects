@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~/portfolio — Healthcare Virtual Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #1a1b26;
+    --bg2:       #16161e;
+    --bg3:       #1f2335;
+    --panel:     #24283b;
+    --border:    #2a2e42;
+    --text:      #c0caf5;
+    --subtle:    #565f89;
+    --pink:      #f7768e;
+    --red:       #f7768e;
+    --orange:    #ff9e64;
+    --yellow:    #e0af68;
+    --green:     #9ece6a;
+    --teal:      #73daca;
+    --cyan:      #7dcfff;
+    --blue:      #7aa2f7;
+    --purple:    #bb9af7;
+    --magenta:   #c678dd;
+    --white:     #a9b1d6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── SCANLINE OVERLAY ─────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── KITTY WINDOW CHROME ─────────────────────── */
+  .kitty-root {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 16px 60px;
+  }
+
+  .kitty-window {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(122,162,247,0.08),
+      0 24px 80px rgba(0,0,0,0.6),
+      0 0 60px rgba(187,154,247,0.04);
+    margin-bottom: 20px;
+    animation: fadeSlide 0.5s ease both;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .kitty-titlebar {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+  }
+
+  .kitty-dots { display: flex; gap: 7px; }
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+  .dot-red    { background: var(--pink); box-shadow: 0 0 6px var(--pink); }
+  .dot-yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  .dot-green  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  .kitty-tabs {
+    display: flex;
+    gap: 2px;
+    margin-left: 10px;
+    flex: 1;
+  }
+
+  .tab {
+    padding: 2px 14px;
+    border-radius: 4px 4px 0 0;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--subtle);
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: var(--bg2);
+    color: var(--blue);
+    border-color: var(--border);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .tab-icon { margin-right: 5px; }
+
+  .kitty-body { padding: 20px 24px; min-height: 80px; }
+
+  /* ── PROMPT LINE ─────────────────────────────── */
+  .prompt {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .p-user  { color: var(--green); font-weight: 600; }
+  .p-at    { color: var(--subtle); }
+  .p-host  { color: var(--blue); font-weight: 600; }
+  .p-sep   { color: var(--subtle); margin: 0 2px; }
+  .p-path  { color: var(--yellow); }
+  .p-git   { color: var(--purple); margin-left: 6px; }
+  .p-branch{ color: var(--teal); }
+  .p-arrow { color: var(--pink); margin-left: 6px; font-weight: 700; }
+  .p-cmd   { color: var(--text); margin-left: 6px; }
+  .p-arg   { color: var(--cyan); margin-left: 6px; }
+  .p-flag  { color: var(--orange); margin-left: 6px; }
+
+  .output { padding: 6px 0 14px 0; }
+
+  /* ── NAV BAR ─────────────────────────────────── */
+  .nav-window {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    animation: fadeSlide 0.4s ease both;
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-size: 13px;
+    color: var(--purple);
+    font-weight: 700;
+  }
+  .nav-logo span { color: var(--pink); }
+
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: var(--subtle);
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .nav-link:hover {
+    color: var(--text);
+    background: var(--panel);
+    border-color: var(--border);
+  }
+  .nav-link .nl-prefix { color: var(--pink); }
+  .nav-link .nl-num    { color: var(--orange); }
+
+  /* ── SECTION STYLES ──────────────────────────── */
+  section { margin-bottom: 20px; }
+
+  .sec-comment {
+    color: var(--subtle);
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .sec-comment::before { content: '# '; color: var(--green); }
+
+  /* ── HERO ────────────────────────────────────── */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .hero-name {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .hn-first { color: var(--blue); }
+  .hn-last  { color: var(--purple); }
+
+  .hero-role {
+    color: var(--teal);
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .hero-role::before { content: '> '; color: var(--pink); }
+
+  .hero-bio {
+    color: var(--white);
+    font-size: 13px;
+    max-width: 580px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .badge-pink   { color: var(--pink);   border-color: var(--pink);   background: rgba(247,118,142,0.08); }
+  .badge-cyan   { color: var(--cyan);   border-color: var(--cyan);   background: rgba(125,207,255,0.08); }
+  .badge-green  { color: var(--green);  border-color: var(--green);  background: rgba(158,206,106,0.08); }
+  .badge-purple { color: var(--purple); border-color: var(--purple); background: rgba(187,154,247,0.08); }
+  .badge-orange { color: var(--orange); border-color: var(--orange); background: rgba(255,158,100,0.08); }
+  .badge-teal   { color: var(--teal);   border-color: var(--teal);   background: rgba(115,218,202,0.08); }
+
+  .kitty-ascii {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--purple);
+    text-align: right;
+    opacity: 0.85;
+  }
+  .kitty-ascii .ka-pink   { color: var(--pink); }
+  .kitty-ascii .ka-yellow { color: var(--yellow); }
+  .kitty-ascii .ka-cyan   { color: var(--cyan); }
+  .kitty-ascii .ka-green  { color: var(--green); }
+
+  /* ── NEOFETCH BLOCK ──────────────────────────── */
+  .neofetch {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .nf-cat {
+    font-size: 9px;
+    line-height: 1.25;
+    color: var(--purple);
+    font-family: 'Fira Code', monospace;
+  }
+
+  .nf-info { font-size: 12px; }
+  .nf-row  { display: flex; gap: 0; margin-bottom: 3px; }
+  .nf-key  { color: var(--blue); font-weight: 600; min-width: 120px; }
+  .nf-sep  { color: var(--subtle); margin: 0 4px; }
+  .nf-val  { color: var(--text); }
+
+  .nf-colors {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .cc {
+    width: 18px; height: 18px;
+    border-radius: 3px;
+  }
+
+  /* ── PROJECTS ────────────────────────────────── */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .project-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .project-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(122,162,247,0.12);
+  }
+
+  .pc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .pc-name {
+    font-weight: 600;
+    color: var(--blue);
+    font-size: 13px;
+  }
+
+  .pc-lang {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--subtle);
+  }
+  .lang-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .pc-desc {
+    color: var(--white);
+    font-size: 12px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .pc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pc-tag {
+    font-size: 10px;
+    color: var(--teal);
+    background: rgba(115,218,202,0.08);
+    border: 1px solid rgba(115,218,202,0.2);
+    border-radius: 3px;
+    padding: 1px 7px;
+  }
+
+  .pc-links {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+  }
+  .pc-link {
+    font-size: 11px;
+    color: var(--purple);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(187,154,247,0.3);
+    transition: color 0.15s;
+  }
+  .pc-link:hover { color: var(--pink); }
+
+  /* ── CERTIFICATIONS ──────────────────────────── */
+  .certs-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .cert-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    transition: border-left-color 0.2s, transform 0.2s;
+  }
+  .cert-item:hover {
+    border-left-color: var(--pink);
+    transform: translateX(4px);
+  }
+
+  .cert-name  { color: var(--text); font-weight: 600; font-size: 13px; }
+  .cert-org   { color: var(--subtle); font-size: 11px; margin-top: 2px; }
+  .cert-date  { color: var(--yellow); font-size: 11px; white-space: nowrap; }
+
+  /* ── SKILLS ──────────────────────────────────── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  .skill-group {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .sg-title {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .skill-bar-row { margin-bottom: 7px; }
+  .sbr-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  .sbr-name { color: var(--white); }
+  .sbr-pct  { color: var(--subtle); }
+
+  .skill-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .skill-fill {
+    height: 100%;
+    border-radius: 2px;
+    animation: growBar 1.2s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  @keyframes growBar {
+    from { width: 0 !important; }
+  }
+
+  /* ── BLOG ────────────────────────────────────── */
+  .blog-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .blog-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: start;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .blog-item:hover { border-color: var(--purple); }
+
+  .blog-title { color: var(--blue); font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .blog-excerpt { color: var(--subtle); font-size: 12px; }
+  .blog-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .blog-tag {
+    font-size: 10px;
+    color: var(--orange);
+    background: rgba(255,158,100,0.08);
+    border: 1px solid rgba(255,158,100,0.2);
+    border-radius: 3px;
+    padding: 1px 6px;
+  }
+  .blog-date { color: var(--subtle); font-size: 11px; white-space: nowrap; }
+  .blog-readtime { color: var(--teal); font-size: 10px; margin-top: 3px; text-align: right; }
+
+  /* ── CONTACT ─────────────────────────────────── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .contact-form {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .cf-title { color: var(--green); font-size: 12px; margin-bottom: 14px; }
+  .cf-title::before { content: '$ '; color: var(--pink); }
+
+  .cf-field { margin-bottom: 12px; }
+  .cf-label { display: block; color: var(--subtle); font-size: 11px; margin-bottom: 5px; }
+  .cf-label::before { content: '--'; color: var(--orange); margin-right: 4px; }
+
+  .cf-input, .cf-textarea {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    resize: vertical;
+  }
+  .cf-input:focus, .cf-textarea:focus { border-color: var(--blue); }
+
+  .cf-btn {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border: none;
+    border-radius: 5px;
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .cf-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cl-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .cl-item:hover { border-color: var(--teal); transform: translateX(4px); }
+
+  .cl-icon { font-size: 18px; width: 28px; text-align: center; }
+  .cl-label { font-size: 11px; color: var(--subtle); }
+  .cl-value { font-size: 13px; color: var(--teal); }
+
+  /* ── CURSOR BLINK ────────────────────────────── */
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--pink);
+    vertical-align: middle;
+    margin-left: 3px;
+    animation: blink 1.1s step-end infinite;
+    border-radius: 1px;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ── COLOR PALETTE STRIP ─────────────────────── */
+  .palette {
+    display: flex;
+    gap: 3px;
+    margin: 10px 0 4px;
+  }
+  .pal { height: 6px; flex: 1; border-radius: 2px; }
+
+  /* ── RESPONSIVE ──────────────────────────────── */
+  @media (max-width: 640px) {
+    .hero-grid    { grid-template-columns: 1fr; }
+    .kitty-ascii  { display: none; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .neofetch     { grid-template-columns: 1fr; }
+    .nf-cat       { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="kitty-root">
+<nav class="nav-window">
+  <div class="nav-logo"><span>~</span>/portfolio</div>
+  <div class="nav-links">
+    <a class="nav-link" href="#about"><span class="nl-prefix">:</span><span class="nl-num">1</span> about</a>
+    <a class="nav-link" href="#projects"><span class="nl-prefix">:</span><span class="nl-num">2</span> projects</a>
+    <a class="nav-link" href="#certs"><span class="nl-prefix">:</span><span class="nl-num">3</span> certs</a>
+    <a class="nav-link" href="#skills"><span class="nl-prefix">:</span><span class="nl-num">4</span> skills</a>
+    <a class="nav-link" href="#blog"><span class="nl-prefix">:</span><span class="nl-num">5</span> blog</a>
+    <a class="nav-link" href="#contact"><span class="nl-prefix">:</span><span class="nl-num">6</span> contact</a>
+  </div>
+</nav>
+
+<!-- ── ABOUT ──────────────────────────────────────────── -->
+<section id="about">
+<div class="kitty-window" style="animation-delay:0.05s">
+  <div class="kitty-titlebar">
+    <div class="kitty-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="kitty-tabs">
+      <div class="tab active"><span class="tab-icon">🐱</span>about.sh</div>
+      <div class="tab">zsh</div>
+    </div>
+  </div>
+  <div class="kitty-body">
+    <div class="prompt">
+      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+      <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
+      <span class="p-git"> </span><span class="p-branch"> main</span>
+      <span class="p-arrow">❯</span>
+      <span class="p-cmd">cat</span><span class="p-arg">about.sh</span>
+    </div>
+    <div class="output">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-name">
+            <span class="hn-first">Luke Thomas</span>&nbsp;<span class="hn-last">Rivas</span>
+          </div>
+          <div class="hero-role">Healthcare Virtual Assistant | Nursing Student</div>
+          <p class="hero-bio">
+            I’m a nursing student with a strong interest in healthcare technology and virtual assistance.
+            Currently pursuing my degree while building small tools that make clinical workflows smarter,
+            documentation easier, and patient care more efficient. I explore how systems like EHRs,
+            automation, and AI can support healthcare professionals in real-world settings.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-pink">💉 Nursing Student</span>
+            <span class="badge badge-cyan">🤖 Health Tech</span>
+            <span class="badge badge-green">📋 EHR Familiar</span>
+            <span class="badge badge-purple">🧠 AI Enthusiast</span>
+            <span class="badge badge-orange">🩺 Patient Advocate</span>
+            <span class="badge badge-teal">💻 Linux User</span>
+          </div>
+        </div>
+        <div class="kitty-ascii">
+<pre>
+<span class="ka-pink">  /\_____/\</span>
+<span class="ka-pink"> /  o   o  \</span>
+<span class="ka-pink">( ==  ^  == )</span>
+<span class="ka-cyan"> )         (</span>
+<span class="ka-cyan">(           )</span>
+<span class="ka-green">( (  )   (  ) )</span>
+<span class="ka-yellow">(__(__)___(__)__)</span>
+<span class="ka-pink">  healthcare.cat</span>
+</pre>
+        </div>
+      </div>
+
+      <div class="palette" style="margin-top:20px">
+        <div class="pal" style="background:var(--pink)"></div>
+        <div class="pal" style="background:var(--orange)"></div>
+        <div class="pal" style="background:var(--yellow)"></div>
+        <div class="pal" style="background:var(--green)"></div>
+        <div class="pal" style="background:var(--teal)"></div>
+        <div class="pal" style="background:var(--cyan)"></div>
+        <div class="pal" style="background:var(--blue)"></div>
+        <div class="pal" style="background:var(--purple)"></div>
+        <div class="pal" style="background:var(--magenta)"></div>
+      </div>
+
+      <!-- neofetch -->
+      <div class="prompt" style="margin-top:14px">
+        <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+        <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
+        <span class="p-arrow">❯</span>
+        <span class="p-cmd">neofetch</span>
+      </div>
+      <div class="output">
+        <div class="neofetch">
+          <div class="nf-cat" style="color:var(--purple)">
+<pre><span style="color:var(--pink)">  /\_____/\</span>
+<span style="color:var(--pink)"> /  </span><span style="color:var(--yellow)">o</span><span style="color:var(--pink)">   </span><span style="color:var(--yellow)">o</span><span style="color:var(--pink)">  \</span>
+<span style="color:var(--pink)">( ==  </span><span style="color:var(--cyan)">^</span><span style="color:var(--pink)">  == )</span>
+<span style="color:var(--cyan)"> )         (</span>
+<span style="color:var(--cyan)">(           )</span>
+<span style="color:var(--green)">( (  )   (  ) )</span>
+<span style="color:var(--teal)">(__(__)_(__)__)</span></pre>
+          </div>
+          <div class="nf-info">
+            <div class="nf-row"><span class="nf-key" style="color:var(--pink)">nurse</span><span class="nf-sep">@</span><span class="nf-val" style="color:var(--blue)">arch-health</span></div>
+            <div class="nf-row"><span class="nf-key">OS</span><span class="nf-sep">:</span><span class="nf-val">Arch Linux (Healthcare Edition)</span></div>
+            <div class="nf-row"><span class="nf-key">Shell</span><span class="nf-sep">:</span><span class="nf-val">zsh 5.9 + oh-my-zsh</span></div>
+            <div class="nf-row"><span class="nf-key">Terminal</span><span class="nf-sep">:</span><span class="nf-val">kitty 0.31.0</span></div>
+            <div class="nf-row"><span class="nf-key">Theme</span><span class="nf-sep">:</span><span class="nf-val">TokyoNight Storm</span></div>
+            <div class="nf-row"><span class="nf-key">Editor</span><span class="nf-sep">:</span><span class="nf-val">Neovim + LazyVim</span></div>
+            <div class="nf-row"><span class="nf-key">WM</span><span class="nf-sep">:</span><span class="nf-val">Hyprland</span></div>
+            <div class="nf-row"><span class="nf-key">Specialty</span><span class="nf-sep">:</span><span class="nf-val" style="color:var(--teal)">Healthcare Informatics</span></div>
+            <div class="nf-row"><span class="nf-key">Status</span><span class="nf-sep">:</span><span class="nf-val" style="color:var(--green)">open to opportunities</span></div>
+            <div class="nf-colors">
+              <div class="cc" style="background:var(--bg3)"></div>
+              <div class="cc" style="background:var(--pink)"></div>
+              <div class="cc" style="background:var(--orange)"></div>
+              <div class="cc" style="background:var(--yellow)"></div>
+              <div class="cc" style="background:var(--green)"></div>
+              <div class="cc" style="background:var(--teal)"></div>
+              <div class="cc" style="background:var(--blue)"></div>
+              <div class="cc" style="background:var(--purple)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ── PROJECTS ─────────────────────────────────────── -->
+<section id="projects">
+<div class="kitty-window" style="animation-delay:0.1s">
+  <div class="kitty-titlebar">
+    <div class="kitty-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="kitty-tabs">
+      <div class="tab active"><span class="tab-icon">🗂️</span>projects/</div>
+      <div class="tab">ls -la</div>
+    </div>
+  </div>
+  <div class="kitty-body">
+    <p class="sec-comment">Healthcare projects & open source contributions</p>
+    <div class="prompt">
+      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+      <span class="p-sep">:</span><span class="p-path">~/portfolio/projects</span>
+      <span class="p-arrow">❯</span>
+      <span class="p-cmd">ls</span><span class="p-flag">--color=auto</span>
+    </div>
+    <div class="output">
+      <div class="projects-grid">
+
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">📋 MedNote AI</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--yellow)"></span>Python</span>
+          </div>
+          <p class="pc-desc">AI-powered clinical note assistant that transcribes and structures SOAP notes from voice input, reducing documentation time by ~40%.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">NLP</span>
+            <span class="pc-tag">Whisper</span>
+            <span class="pc-tag">FastAPI</span>
+            <span class="pc-tag">HIPAA</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="#">[github]</a>
+            <a class="pc-link" href="#">[demo]</a>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">💊 RxReminder Bot</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--blue)"></span>TypeScript</span>
+          </div>
+          <p class="pc-desc">Telegram bot for medication adherence reminders. Supports complex schedules, drug interaction warnings, and caregiver alerts.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Telegram API</span>
+            <span class="pc-tag">Node.js</span>
+            <span class="pc-tag">SQLite</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="#">[github]</a>
+            <a class="pc-link" href="#">[live]</a>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">🫀 VitalDash</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--cyan)"></span>React</span>
+          </div>
+          <p class="pc-desc">Patient vitals dashboard with trend visualization and anomaly detection alerts. Designed for bedside tablet use in clinical settings.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">React</span>
+            <span class="pc-tag">Chart.js</span>
+            <span class="pc-tag">FHIR</span>
+            <span class="pc-tag">WebSocket</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="#">[github]</a>
+            <a class="pc-link" href="#">[demo]</a>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">🧠 ClinicalQA</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Python</span>
+          </div>
+          <p class="pc-desc">RAG-powered Q&A tool trained on clinical guidelines (JNC, AHA, WHO). Helps nursing students quickly reference evidence-based protocols.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">LangChain</span>
+            <span class="pc-tag">RAG</span>
+            <span class="pc-tag">Chroma</span>
+            <span class="pc-tag">Ollama</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="#">[github]</a>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">📱 NurseShift</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Dart</span>
+          </div>
+          <p class="pc-desc">Flutter app for shift handoff communication. Structured SBAR format, task checklists, and patient flag system built for handoff safety.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Flutter</span>
+            <span class="pc-tag">Firebase</span>
+            <span class="pc-tag">SBAR</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="#">[github]</a>
+            <a class="pc-link" href="#">[apk]</a>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">🔬 LabInterpreter</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>Python</span>
+          </div>
+          <p class="pc-desc">CLI tool that parses lab result PDFs and flags critical values with plain-English explanations. Built for student learning support.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">pdfplumber</span>
+            <span class="pc-tag">click</span>
+            <span class="pc-tag">rich</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="#">[github]</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ── CERTIFICATIONS ─────────────────────────────────── -->
+<section id="certs">
+<div class="kitty-window" style="animation-delay:0.15s">
+  <div class="kitty-titlebar">
+    <div class="kitty-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="kitty-tabs">
+      <div class="tab active"><span class="tab-icon">🏅</span>certs.json</div>
+    </div>
+  </div>
+  <div class="kitty-body">
+    <p class="sec-comment">Certifications &amp; credentials earned</p>
+    <div class="prompt">
+      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+      <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
+      <span class="p-arrow">❯</span>
+      <span class="p-cmd">jq</span><span class="p-arg">'.[]'</span><span class="p-flag">certs.json</span>
+    </div>
+    <div class="output">
+      <div class="certs-list">
+
+        <div class="cert-item">
+          <div>
+            <div class="cert-name">🩺 Basic Life Support (BLS)</div>
+            <div class="cert-org">American Heart Association</div>
+          </div>
+          <div class="cert-date">2024-03</div>
+        </div>
+
+        <div class="cert-item" style="border-left-color:var(--blue)">
+          <div>
+            <div class="cert-name">🔒 HIPAA Compliance Training</div>
+            <div class="cert-org">HHS Office for Civil Rights</div>
+          </div>
+          <div class="cert-date">2024-01</div>
+        </div>
+
+        <div class="cert-item" style="border-left-color:var(--purple)">
+          <div>
+            <div class="cert-name">🤖 AI for Healthcare Professionals</div>
+            <div class="cert-org">Coursera / Johns Hopkins</div>
+          </div>
+          <div class="cert-date">2023-11</div>
+        </div>
+
+        <div class="cert-item" style="border-left-color:var(--orange)">
+          <div>
+            <div class="cert-name">📊 Health Informatics Fundamentals</div>
+            <div class="cert-org">AMIA 10×10</div>
+          </div>
+          <div class="cert-date">2023-08</div>
+        </div>
+
+        <div class="cert-item" style="border-left-color:var(--yellow)">
+          <div>
+            <div class="cert-name">💻 Python for Everybody</div>
+            <div class="cert-org">University of Michigan / Coursera</div>
+          </div>
+          <div class="cert-date">2023-05</div>
+        </div>
+
+        <div class="cert-item" style="border-left-color:var(--green)">
+          <div>
+            <div class="cert-name">🧬 Genomics Data Science</div>
+            <div class="cert-org">Johns Hopkins / Coursera</div>
+          </div>
+          <div class="cert-date">2022-12</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ── SKILLS ─────────────────────────────────────────── -->
+<section id="skills">
+<div class="kitty-window" style="animation-delay:0.2s">
+  <div class="kitty-titlebar">
+    <div class="kitty-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="kitty-tabs">
+      <div class="tab active"><span class="tab-icon">⚙️</span>skills.conf</div>
+    </div>
+  </div>
+  <div class="kitty-body">
+    <p class="sec-comment">Technical &amp; clinical skill stack</p>
+    <div class="prompt">
+      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+      <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
+      <span class="p-arrow">❯</span>
+      <span class="p-cmd">cat</span><span class="p-arg">skills.conf</span>
+    </div>
+    <div class="output">
+      <div class="skills-grid">
+
+        <div class="skill-group">
+          <div class="sg-title" style="color:var(--pink)">🩺 Clinical</div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Patient Assessment</span><span class="sbr-pct">90%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:90%;background:var(--pink)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Medication Admin</span><span class="sbr-pct">82%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:82%;background:var(--pink)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">EHR / EMR</span><span class="sbr-pct">75%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:75%;background:var(--pink)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">SBAR Communication</span><span class="sbr-pct">88%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:88%;background:var(--pink)"></div></div>
+          </div>
+        </div>
+
+        <div class="skill-group">
+          <div class="sg-title" style="color:var(--yellow)">💻 Programming</div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Python</span><span class="sbr-pct">72%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:72%;background:var(--yellow)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">JavaScript</span><span class="sbr-pct">60%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:60%;background:var(--yellow)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Bash / Shell</span><span class="sbr-pct">65%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:65%;background:var(--yellow)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">SQL</span><span class="sbr-pct">55%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:55%;background:var(--yellow)"></div></div>
+          </div>
+        </div>
+
+        <div class="skill-group">
+          <div class="sg-title" style="color:var(--teal)">🤖 AI / Data</div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Prompt Engineering</span><span class="sbr-pct">80%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:80%;background:var(--teal)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">LangChain / RAG</span><span class="sbr-pct">60%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:60%;background:var(--teal)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Data Visualization</span><span class="sbr-pct">65%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:65%;background:var(--teal)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">FHIR / HL7</span><span class="sbr-pct">50%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:50%;background:var(--teal)"></div></div>
+          </div>
+        </div>
+
+        <div class="skill-group">
+          <div class="sg-title" style="color:var(--purple)">🐧 Linux / Tools</div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Arch Linux</span><span class="sbr-pct">77%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:77%;background:var(--purple)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Neovim</span><span class="sbr-pct">68%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:68%;background:var(--purple)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Git / GitHub</span><span class="sbr-pct">70%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:70%;background:var(--purple)"></div></div>
+          </div>
+          <div class="skill-bar-row">
+            <div class="sbr-top"><span class="sbr-name">Docker</span><span class="sbr-pct">52%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:52%;background:var(--purple)"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ── BLOG ───────────────────────────────────────────── -->
+<section id="blog">
+<div class="kitty-window" style="animation-delay:0.25s">
+  <div class="kitty-titlebar">
+    <div class="kitty-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="kitty-tabs">
+      <div class="tab active"><span class="tab-icon">📝</span>blog/</div>
+    </div>
+  </div>
+  <div class="kitty-body">
+    <p class="sec-comment">Writing about healthcare, tech, and the space between</p>
+    <div class="prompt">
+      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+      <span class="p-sep">:</span><span class="p-path">~/portfolio/blog</span>
+      <span class="p-arrow">❯</span>
+      <span class="p-cmd">ls</span><span class="p-flag">-lt</span><span class="p-arg">*.md</span>
+    </div>
+    <div class="output">
+      <div class="blog-list">
+
+        <div class="blog-item">
+          <div>
+            <div class="blog-title">Why Every Nurse Should Learn to Code (Even a Little)</div>
+            <div class="blog-excerpt">Clinical workflows are broken. Here's how a few lines of Python changed how I document my shifts...</div>
+            <div class="blog-tags">
+              <span class="blog-tag">nursing</span>
+              <span class="blog-tag">python</span>
+              <span class="blog-tag">workflow</span>
+            </div>
+          </div>
+          <div>
+            <div class="blog-date">2024-04-12</div>
+            <div class="blog-readtime">6 min read</div>
+          </div>
+        </div>
+
+        <div class="blog-item">
+          <div>
+            <div class="blog-title">Setting Up Neovim for Clinical Note Writing</div>
+            <div class="blog-excerpt">My dotfiles setup that turns Neovim into a structured SOAP note powerhouse with custom snippets...</div>
+            <div class="blog-tags">
+              <span class="blog-tag">neovim</span>
+              <span class="blog-tag">dotfiles</span>
+              <span class="blog-tag">productivity</span>
+            </div>
+          </div>
+          <div>
+            <div class="blog-date">2024-03-01</div>
+            <div class="blog-readtime">9 min read</div>
+          </div>
+        </div>
+
+        <div class="blog-item">
+          <div>
+            <div class="blog-title">FHIR Explained for Nursing Students</div>
+            <div class="blog-excerpt">No CS degree required. Here's what FHIR actually is and why it matters for the future of patient data...</div>
+            <div class="blog-tags">
+              <span class="blog-tag">FHIR</span>
+              <span class="blog-tag">health informatics</span>
+              <span class="blog-tag">explainer</span>
+            </div>
+          </div>
+          <div>
+            <div class="blog-date">2024-01-18</div>
+            <div class="blog-readtime">7 min read</div>
+          </div>
+        </div>
+
+        <div class="blog-item">
+          <div>
+            <div class="blog-title">Arch Linux on a Hospital Laptop: A Cautionary Tale</div>
+            <div class="blog-excerpt">I installed Arch on my clinical laptop. Here's what happened next (spoiler: it actually worked)...</div>
+            <div class="blog-tags">
+              <span class="blog-tag">arch linux</span>
+              <span class="blog-tag">humor</span>
+              <span class="blog-tag">linux</span>
+            </div>
+          </div>
+          <div>
+            <div class="blog-date">2023-11-05</div>
+            <div class="blog-readtime">5 min read</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ── CONTACT ────────────────────────────────────────── -->
+<section id="contact">
+<div class="kitty-window" style="animation-delay:0.3s">
+  <div class="kitty-titlebar">
+    <div class="kitty-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="kitty-tabs">
+      <div class="tab active"><span class="tab-icon">📡</span>contact.sh</div>
+    </div>
+  </div>
+  <div class="kitty-body">
+    <p class="sec-comment">Let's build something at the intersection of care &amp; code</p>
+    <div class="prompt">
+      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+      <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
+      <span class="p-arrow">❯</span>
+      <span class="p-cmd">./contact.sh</span><span class="p-flag">--send-message</span>
+    </div>
+    <div class="output">
+      <div class="contact-grid">
+        <div class="contact-form">
+          <div class="cf-title">send_message()</div>
+          <div class="cf-field">
+            <label class="cf-label">name</label>
+            <input class="cf-input" type="text" placeholder="your name" />
+          </div>
+          <div class="cf-field">
+            <label class="cf-label">email</label>
+            <input class="cf-input" type="email" placeholder="you@domain.com" />
+          </div>
+          <div class="cf-field">
+            <label class="cf-label">message</label>
+            <textarea class="cf-textarea" rows="4" placeholder="Hello, I wanted to reach out about..."></textarea>
+          </div>
+          <button class="cf-btn" onclick="this.textContent='✓ sent!'">$ submit --message</button>
+        </div>
+
+        <div class="contact-links">
+          <a class="cl-item" href="#">
+            <span class="cl-icon">🐙</span>
+            <div>
+              <div class="cl-label">github</div>
+              <div class="cl-value">github.com/lucidxviii</div>
+            </div>
+          </a>
+          <a class="cl-item" href="#">
+            <span class="cl-icon">💼</span>
+            <div>
+              <div class="cl-label">linkedin</div>
+              <div class="cl-value">linkedin.com/in/lucidxix</div>
+            </div>
+          </a>
+          <a class="cl-item" href="#">
+            <span class="cl-icon">🐦</span>
+            <div>
+              <div class="cl-label">twitter / x</div>
+              <div class="cl-value">@yourhandle</div>
+            </div>
+          </a>
+          <a class="cl-item" href="mailto:you@email.com">
+            <span class="cl-icon">📧</span>
+            <div>
+              <div class="cl-label">email</div>
+              <div class="cl-value">rivaslukethomas@gmail.com</div>
+            </div>
+          </a>
+          <div class="cl-item" style="cursor:default">
+            <span class="cl-icon">📍</span>
+            <div>
+              <div class="cl-label">location</div>
+              <div class="cl-value">Bacolod City, Philippines</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="prompt">
+          <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+          <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
+          <span class="p-arrow">❯</span>
+          <span class="p-cmd">echo</span><span class="p-arg">"thanks for visiting :3"</span>
+          <span class="cursor"></span>
+        </div>
+        <div style="color:var(--green);padding:6px 0 0 0;font-size:13px">thanks for visiting :3</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+</div><!-- kitty-root -->
+</body>
+</html>
