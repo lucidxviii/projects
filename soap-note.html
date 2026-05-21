@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>~/tools — SOAP Note Builder</title>
+<title>~/tools — SOAPIE Note Builder</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#1a1b26;--bg2:#16161e;--bg3:#1f2335;--panel:#24283b;--border:#2a2e42;--text:#c0caf5;--subtle:#565f89;--pink:#f7768e;--orange:#ff9e64;--yellow:#e0af68;--green:#9ece6a;--teal:#73daca;--cyan:#7dcfff;--blue:#7aa2f7;--purple:#bb9af7;--white:#a9b1d6;}
+  :root{--bg:#1a1b26;--bg2:#16161e;--bg3:#1f2335;--panel:#24283b;--border:#2a2e42;--text:#c0caf5;--subtle:#565f89;--pink:#f7768e;--orange:#ff9e64;--yellow:#e0af68;--green:#9ece6a;--teal:#73daca;--cyan:#7dcfff;--blue:#7aa2f7;--purple:#bb9af7;--white:#a9b1d6;--red:#f7768e;--impl:#ff9e64;--eval:#73daca;}
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;}
   body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999;}
@@ -46,6 +46,8 @@
   .o-letter{background:rgba(122,162,247,0.15);color:var(--blue);}
   .a-letter{background:rgba(158,206,106,0.15);color:var(--green);}
   .p-letter{background:rgba(187,154,247,0.15);color:var(--purple);}
+  .i-letter{background:rgba(255,158,100,0.15);color:var(--orange);}
+  .e-letter{background:rgba(115,218,202,0.15);color:var(--teal);}
 
   .vital-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
   .vital-field{display:flex;flex-direction:column;gap:3px;}
@@ -67,15 +69,18 @@
 
   .output-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:18px;margin-top:14px;display:none;white-space:pre-wrap;font-size:12px;line-height:1.8;color:var(--white);}
   .output-box.show{display:block;animation:fadeSlide 0.3s ease both;}
-  .out-section{color:var(--blue);font-weight:700;}
-  .out-label{color:var(--teal);}
 
   .disclaimer{background:rgba(247,118,142,0.06);border:1px solid rgba(247,118,142,0.2);border-radius:6px;padding:12px 16px;font-size:11px;color:var(--subtle);margin-top:16px;line-height:1.7;}
   .disclaimer strong{color:var(--pink);}
 
-  .progress{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-  .prog-item{font-size:10px;padding:3px 10px;border-radius:3px;border:1px solid var(--border);color:var(--subtle);}
-  .prog-item.done{border-color:var(--green);color:var(--green);}
+  .soapie-badge{display:inline-flex;gap:4px;margin-bottom:16px;}
+  .badge-letter{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .bl-s{background:rgba(247,118,142,0.2);color:var(--pink);}
+  .bl-o{background:rgba(122,162,247,0.2);color:var(--blue);}
+  .bl-a{background:rgba(158,206,106,0.2);color:var(--green);}
+  .bl-p{background:rgba(187,154,247,0.2);color:var(--purple);}
+  .bl-i{background:rgba(255,158,100,0.2);color:var(--orange);}
+  .bl-e{background:rgba(115,218,202,0.2);color:var(--teal);}
 </style>
 </head>
 <body>
@@ -83,14 +88,23 @@
 <div class="kitty-window">
   <div class="titlebar">
     <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
-    <div class="tab-label">📋 soap-note.sh</div>
+    <div class="tab-label">📋 soapie-note.sh</div>
     <a class="back-btn" href="index.html">← back to portfolio</a>
   </div>
   <div class="body">
     <div class="prompt">
       <span class="pu">nurse</span><span class="pat">@</span><span class="ph">arch</span>
       <span style="color:var(--subtle)">:</span><span class="pp">~/tools</span>
-      <span class="pa">❯</span><span class="pc">./soap-note.sh --new</span>
+      <span class="pa">❯</span><span class="pc">./soapie-note.sh --new</span>
+    </div>
+
+    <div class="soapie-badge">
+      <div class="badge-letter bl-s">S</div>
+      <div class="badge-letter bl-o">O</div>
+      <div class="badge-letter bl-a">A</div>
+      <div class="badge-letter bl-p">P</div>
+      <div class="badge-letter bl-i">I</div>
+      <div class="badge-letter bl-e">E</div>
     </div>
 
     <!-- PATIENT INFO -->
@@ -145,12 +159,12 @@
             <div class="vital-field"><label>HR (bpm)</label><input id="o-hr" type="number" placeholder="72" /></div>
             <div class="vital-field"><label>RR (breaths/min)</label><input id="o-rr" type="number" placeholder="16" /></div>
             <div class="vital-field"><label>Temp (°C)</label><input id="o-temp" type="number" step="0.1" placeholder="37.0" /></div>
-            <div class="vital-field"><label>SpO₂ (%)</label><input id="o-spo2" type="number" placeholder="98" /></div>
+            <div class="vital-field"><label>SpO2 (%)</label><input id="o-spo2" type="number" placeholder="98" /></div>
             <div class="vital-field"><label>Pain score</label><input id="o-pain" type="number" min="0" max="10" placeholder="0–10" /></div>
           </div>
           <div class="chip-label">general appearance</div>
           <div class="chip-group">
-            <span class="chip" onclick="toggleChip(this)" data-field="o-appear">alert & oriented ×4</span>
+            <span class="chip" onclick="toggleChip(this)" data-field="o-appear">alert & oriented x4</span>
             <span class="chip" onclick="toggleChip(this)" data-field="o-appear">NAD</span>
             <span class="chip" onclick="toggleChip(this)" data-field="o-appear">confused</span>
             <span class="chip" onclick="toggleChip(this)" data-field="o-appear">diaphoretic</span>
@@ -188,29 +202,84 @@
       <div class="soap-section">
         <div class="soap-header">
           <div class="soap-letter p-letter">P</div>
-          <div><div class="soap-title" style="color:var(--purple)">Plan</div><div class="soap-sub">interventions & follow-up</div></div>
+          <div><div class="soap-title" style="color:var(--purple)">Plan</div><div class="soap-sub">intended interventions & goals</div></div>
         </div>
         <div class="soap-body">
-          <div class="chip-label">common interventions</div>
+          <div class="chip-label">planned interventions (quick select)</div>
           <div class="chip-group" id="int-chips">
             <span class="chip" onclick="toggleInt(this,'Administer ordered analgesics')">analgesics</span>
             <span class="chip" onclick="toggleInt(this,'Monitor vitals q4h')">vitals q4h</span>
             <span class="chip" onclick="toggleInt(this,'IV fluid maintenance')">IV fluids</span>
-            <span class="chip" onclick="toggleInt(this,'O₂ supplementation per order')">O₂ therapy</span>
-            <span class="chip" onclick="toggleInt(this,'Elevate HOB ≥30°')">HOB elevation</span>
+            <span class="chip" onclick="toggleInt(this,'O2 supplementation per order')">O2 therapy</span>
+            <span class="chip" onclick="toggleInt(this,'Elevate HOB 30 degrees')">HOB elevation</span>
             <span class="chip" onclick="toggleInt(this,'Ambulation BID')">ambulation BID</span>
             <span class="chip" onclick="toggleInt(this,'Patient education provided')">pt education</span>
             <span class="chip" onclick="toggleInt(this,'MD notified of findings')">notify MD</span>
             <span class="chip" onclick="toggleInt(this,'Fall precautions in place')">fall precautions</span>
           </div>
           <div class="field" style="margin-bottom:8px"><label>additional plan / orders</label><textarea id="p-plan" rows="2" placeholder="Specific orders, consults, labs to monitor..."></textarea></div>
-          <div class="field"><label>patient / family education</label><textarea id="p-edu" rows="2" placeholder="Education provided, patient verbalized understanding..."></textarea></div>
+          <div class="field"><label>patient / family education plan</label><textarea id="p-edu" rows="2" placeholder="Education planned, topics to cover..."></textarea></div>
         </div>
       </div>
+
+      <!-- I -->
+      <div class="soap-section">
+        <div class="soap-header">
+          <div class="soap-letter i-letter">I</div>
+          <div><div class="soap-title" style="color:var(--orange)">Implementation</div><div class="soap-sub">nursing actions actually carried out</div></div>
+        </div>
+        <div class="soap-body">
+          <div class="chip-label">implemented actions (quick select)</div>
+          <div class="chip-group" id="impl-chips">
+            <span class="chip" onclick="toggleImpl(this,'Medication administered as ordered')">meds given</span>
+            <span class="chip" onclick="toggleImpl(this,'Vital signs monitored and recorded')">vitals taken</span>
+            <span class="chip" onclick="toggleImpl(this,'IV access maintained and site assessed')">IV maintained</span>
+            <span class="chip" onclick="toggleImpl(this,'O2 applied and titrated per order')">O2 applied</span>
+            <span class="chip" onclick="toggleImpl(this,'HOB elevated 30 degrees')">HOB elevated</span>
+            <span class="chip" onclick="toggleImpl(this,'Assisted with ambulation')">ambulation done</span>
+            <span class="chip" onclick="toggleImpl(this,'Education provided to patient and family')">education given</span>
+            <span class="chip" onclick="toggleImpl(this,'MD informed of patient status')">MD notified</span>
+            <span class="chip" onclick="toggleImpl(this,'Fall precautions reinforced')">fall precautions</span>
+            <span class="chip" onclick="toggleImpl(this,'Wound care performed per protocol')">wound care</span>
+            <span class="chip" onclick="toggleImpl(this,'Repositioned patient q2h')">repositioned</span>
+            <span class="chip" onclick="toggleImpl(this,'Foley catheter care performed')">catheter care</span>
+          </div>
+          <div class="field" style="margin-bottom:8px"><label>additional interventions performed</label><textarea id="i-actions" rows="3" placeholder="Specific nursing actions taken, time of administration, procedures performed..."></textarea></div>
+          <div class="field"><label>time of key interventions</label><input id="i-time" placeholder="e.g. Analgesic given at 0800, vitals taken at 0900" /></div>
+        </div>
+      </div>
+
+      <!-- E -->
+      <div class="soap-section">
+        <div class="soap-header">
+          <div class="soap-letter e-letter">E</div>
+          <div><div class="soap-title" style="color:var(--teal)">Evaluation</div><div class="soap-sub">patient response to interventions</div></div>
+        </div>
+        <div class="soap-body">
+          <div class="chip-label">patient response (quick select)</div>
+          <div class="chip-group" id="eval-chips">
+            <span class="chip" onclick="toggleEval(this,'Patient tolerated intervention well')">tolerated well</span>
+            <span class="chip" onclick="toggleEval(this,'Pain reduced after intervention')">pain reduced</span>
+            <span class="chip" onclick="toggleEval(this,'Vital signs stable post-intervention')">vitals stable</span>
+            <span class="chip" onclick="toggleEval(this,'Patient verbalized understanding of education')">verbalized understanding</span>
+            <span class="chip" onclick="toggleEval(this,'No adverse reactions noted')">no adverse reactions</span>
+            <span class="chip" onclick="toggleEval(this,'Goal partially met — continue plan')">goal partially met</span>
+            <span class="chip" onclick="toggleEval(this,'Goal met — revise plan as needed')">goal met</span>
+            <span class="chip" onclick="toggleEval(this,'Goal not met — reassess and modify plan')">goal not met</span>
+            <span class="chip" onclick="toggleEval(this,'Patient condition improved')">condition improved</span>
+            <span class="chip" onclick="toggleEval(this,'Patient condition unchanged')">unchanged</span>
+            <span class="chip" onclick="toggleEval(this,'Patient condition deteriorated — MD notified')">deteriorated</span>
+          </div>
+          <div class="field" style="margin-bottom:8px"><label>evaluation notes</label><textarea id="e-notes" rows="3" placeholder="Patient response to interventions, progress toward goals, changes observed..."></textarea></div>
+          <div class="field" style="margin-bottom:8px"><label>pain score after intervention (0–10)</label><input id="e-pain" type="number" min="0" max="10" placeholder="0–10" /></div>
+          <div class="field"><label>plan revision / follow-up</label><textarea id="e-followup" rows="2" placeholder="Continue current plan / modify plan / escalate to MD / reassess in X hours..."></textarea></div>
+        </div>
+      </div>
+
     </div>
 
     <div class="action-row">
-      <button class="btn btn-primary" onclick="generateNote()">$ generate --soap-note</button>
+      <button class="btn btn-primary" onclick="generateNote()">$ generate --soapie-note</button>
       <button class="btn btn-secondary" onclick="copyNote()">📋 copy to clipboard</button>
       <button class="btn btn-danger" onclick="clearAll()">🗑️ clear all</button>
     </div>
@@ -218,83 +287,46 @@
     <div class="output-box" id="output"></div>
 
     <div class="disclaimer">
-      <strong>⚠️ For educational & practice use only.</strong> Do not use for actual patient documentation without review and approval by a licensed supervising clinician. Always follow your institution's documentation policies.
+      <strong>For educational & practice use only.</strong> Do not use for actual patient documentation without review and approval by a licensed supervising clinician. Always follow your institution's documentation policies.
     </div>
   </div>
 </div>
 </div>
 
 <script>
-// Set today's date
 document.getElementById('pt-date').value = new Date().toISOString().split('T')[0];
 
-let ccList = [], ndList = [], intList = [];
-let appearList = [];
+let ccList=[], ndList=[], intList=[], implList=[], evalList=[];
+let appearList=[];
 
-function toggleCC(el, val){
-  el.classList.toggle('active');
-  if(el.classList.contains('active')){
-    el.style.background='var(--pink)';el.style.borderColor='var(--pink)';el.style.color='var(--bg)';
-    ccList.push(val);
-  } else {
-    el.style.background='';el.style.borderColor='';el.style.color='';
-    ccList=ccList.filter(v=>v!==val);
-  }
-}
-function toggleND(el, val){
-  el.classList.toggle('active');
-  if(el.classList.contains('active')){
-    el.style.background='var(--green)';el.style.borderColor='var(--green)';el.style.color='var(--bg)';
-    ndList.push(val);
-  } else {
-    el.style.background='';el.style.borderColor='';el.style.color='';
-    ndList=ndList.filter(v=>v!==val);
-  }
-}
-function toggleInt(el, val){
-  el.classList.toggle('active');
-  if(el.classList.contains('active')){
-    el.style.background='var(--purple)';el.style.borderColor='var(--purple)';el.style.color='var(--bg)';
-    intList.push(val);
-  } else {
-    el.style.background='';el.style.borderColor='';el.style.color='';
-    intList=intList.filter(v=>v!==val);
-  }
-}
-function toggleChip(el){
-  const val=el.textContent;
-  el.classList.toggle('active');
-  if(el.classList.contains('active')){
-    el.style.background='var(--blue)';el.style.borderColor='var(--blue)';el.style.color='var(--bg)';
-    appearList.push(val);
-  } else {
-    el.style.background='';el.style.borderColor='';el.style.color='';
-    appearList=appearList.filter(v=>v!==val);
-  }
-}
+function toggleCC(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--pink)';el.style.borderColor='var(--pink)';el.style.color='var(--bg)';ccList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';ccList=ccList.filter(v=>v!==val);}}
+function toggleND(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--green)';el.style.borderColor='var(--green)';el.style.color='var(--bg)';ndList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';ndList=ndList.filter(v=>v!==val);}}
+function toggleInt(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--purple)';el.style.borderColor='var(--purple)';el.style.color='var(--bg)';intList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';intList=intList.filter(v=>v!==val);}}
+function toggleImpl(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--orange)';el.style.borderColor='var(--orange)';el.style.color='var(--bg)';implList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';implList=implList.filter(v=>v!==val);}}
+function toggleEval(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--teal)';el.style.borderColor='var(--teal)';el.style.color='var(--bg)';evalList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';evalList=evalList.filter(v=>v!==val);}}
+function toggleChip(el){const val=el.textContent;el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--blue)';el.style.borderColor='var(--blue)';el.style.color='var(--bg)';appearList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';appearList=appearList.filter(v=>v!==val);}}
 
 function g(id){return document.getElementById(id).value.trim();}
 
 function generateNote(){
   const init=g('pt-init')||'[Patient]';
-  const age=g('pt-age'); const sex=g('pt-sex'); const mrn=g('pt-mrn');
-  const date=g('pt-date'); const room=g('pt-room'); const md=g('pt-md'); const rn=g('pt-rn');
+  const age=g('pt-age');const sex=g('pt-sex');const mrn=g('pt-mrn');
+  const date=g('pt-date');const room=g('pt-room');const md=g('pt-md');const rn=g('pt-rn');
   const cc=[...ccList,g('s-cc')].filter(Boolean).join(', ');
-  const pain=g('s-pain'); const onset=g('s-onset'); const hx=g('s-hx');
+  const pain=g('s-pain');const onset=g('s-onset');const hx=g('s-hx');
   const bp=g('o-bp');const hr=g('o-hr');const rr=g('o-rr');const temp=g('o-temp');const spo2=g('o-spo2');const opain=g('o-pain');
-  const appear=[...appearList].join(', ');
-  const exam=g('o-exam');
-  const dx=[...ndList,g('a-dx')].filter(Boolean).join('; ');
-  const anotes=g('a-notes');
-  const ints=[...intList,g('p-plan')].filter(Boolean);
-  const edu=g('p-edu');
+  const appear=[...appearList].join(', ');const exam=g('o-exam');
+  const dx=[...ndList,g('a-dx')].filter(Boolean).join('; ');const anotes=g('a-notes');
+  const plan=[...intList,g('p-plan')].filter(Boolean);const edu=g('p-edu');
+  const impl=[...implList,g('i-actions')].filter(Boolean);const itime=g('i-time');
+  const eval_=[...evalList,g('e-notes')].filter(Boolean);const epain=g('e-pain');const followup=g('e-followup');
 
   let note=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-NURSING SOAP NOTE
+NURSING SOAPIE NOTE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Patient: ${init}${age?` | Age: ${age}`:''}${sex?` | Sex: ${sex}`:''}${mrn?` | MRN: ${mrn}`:''}
 Date: ${date||new Date().toLocaleDateString()}${room?` | Room: ${room}`:''}
-Attending: ${md||'—'} | Documented by: ${rn||'—'}
+Attending: ${md||'--'} | Documented by: ${rn||'--'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [S] SUBJECTIVE
@@ -304,9 +336,9 @@ ${pain?`Pain Score: ${pain}/10\n`:''}${onset?`Onset/Duration: ${onset}\n`:''}${h
 [O] OBJECTIVE
 ──────────────
 Vitals:
-  BP: ${bp||'—'} mmHg    HR: ${hr||'—'} bpm
-  RR: ${rr||'—'} br/min  Temp: ${temp||'—'}°C
-  SpO₂: ${spo2||'—'}%    Pain: ${opain||'—'}/10
+  BP: ${bp||'--'} mmHg    HR: ${hr||'--'} bpm
+  RR: ${rr||'--'} br/min  Temp: ${temp||'--'}C
+  SpO2: ${spo2||'--'}%    Pain: ${opain||'--'}/10
 ${appear?`\nGeneral Appearance: ${appear}`:''}
 ${exam?`\nExam/Labs: ${exam}`:''}
 
@@ -317,13 +349,26 @@ ${anotes?`\nNotes: ${anotes}`:''}
 
 [P] PLAN
 ──────────────
-Interventions:
-${ints.length?ints.map(i=>`  • ${i}`).join('\n'):'  • No interventions documented'}
-${edu?`\nPatient Education: ${edu}`:''}
+Planned Interventions:
+${plan.length?plan.map(i=>`  - ${i}`).join('\n'):'  - No plan documented'}
+${edu?`\nEducation Plan: ${edu}`:''}
+
+[I] IMPLEMENTATION
+──────────────────
+Actions Performed:
+${impl.length?impl.map(i=>`  - ${i}`).join('\n'):'  - No interventions documented'}
+${itime?`\nKey Intervention Times: ${itime}`:''}
+
+[E] EVALUATION
+──────────────
+Patient Response:
+${eval_.length?eval_.map(i=>`  - ${i}`).join('\n'):'  - Evaluation not documented'}
+${epain?`\nPain Score Post-Intervention: ${epain}/10`:''}
+${followup?`\nFollow-up Plan: ${followup}`:''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Documented by: ${rn||'[Nurse Name, SN]'} | ${date||new Date().toLocaleDateString()}
-[EDUCATIONAL USE ONLY — NOT FOR ACTUAL PATIENT RECORDS]
+[EDUCATIONAL USE ONLY -- NOT FOR ACTUAL PATIENT RECORDS]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
   const box=document.getElementById('output');
@@ -334,10 +379,10 @@ Documented by: ${rn||'[Nurse Name, SN]'} | ${date||new Date().toLocaleDateString
 
 function copyNote(){
   const box=document.getElementById('output');
-  if(!box.textContent){ generateNote(); }
+  if(!box.textContent){generateNote();}
   navigator.clipboard.writeText(box.textContent).then(()=>{
     const btn=document.querySelector('.btn-secondary');
-    btn.textContent='✓ copied!';
+    btn.textContent='checked copied!';
     setTimeout(()=>btn.textContent='📋 copy to clipboard',2000);
   });
 }
@@ -345,10 +390,8 @@ function copyNote(){
 function clearAll(){
   document.querySelectorAll('input,textarea').forEach(el=>el.value='');
   document.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
-  document.querySelectorAll('.chip.active').forEach(el=>{
-    el.classList.remove('active');el.style.background='';el.style.borderColor='';el.style.color='';
-  });
-  ccList=[];ndList=[];intList=[];appearList=[];
+  document.querySelectorAll('.chip.active').forEach(el=>{el.classList.remove('active');el.style.background='';el.style.borderColor='';el.style.color='';});
+  ccList=[];ndList=[];intList=[];implList=[];evalList=[];appearList=[];
   document.getElementById('output').classList.remove('show');
   document.getElementById('output').textContent='';
   document.getElementById('pt-date').value=new Date().toISOString().split('T')[0];
