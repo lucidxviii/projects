@@ -62,6 +62,9 @@
   .btn{padding:9px 20px;border-radius:5px;border:none;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;}
   .btn-primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:var(--bg);}
   .btn-primary:hover{opacity:0.88;transform:translateY(-1px);}
+  .btn-ai{background:linear-gradient(135deg,var(--teal),var(--green));color:var(--bg);}
+  .btn-ai:hover{opacity:0.88;transform:translateY(-1px);}
+  .btn-ai:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
   .btn-secondary{background:var(--panel);color:var(--subtle);border:1px solid var(--border);}
   .btn-secondary:hover{color:var(--text);border-color:var(--blue);}
   .btn-danger{background:rgba(247,118,142,0.1);color:var(--pink);border:1px solid rgba(247,118,142,0.3);}
@@ -69,6 +72,11 @@
 
   .output-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:18px;margin-top:14px;display:none;white-space:pre-wrap;font-size:12px;line-height:1.8;color:var(--white);}
   .output-box.show{display:block;animation:fadeSlide 0.3s ease both;}
+
+  .ai-status{margin-top:10px;font-size:11px;padding:10px 14px;border-radius:6px;display:none;}
+  .ai-status.loading{display:block;background:rgba(115,218,202,0.08);border:1px solid rgba(115,218,202,0.2);color:var(--teal);}
+  .ai-status.success{display:block;background:rgba(158,206,106,0.08);border:1px solid rgba(158,206,106,0.2);color:var(--green);}
+  .ai-status.error{display:block;background:rgba(247,118,142,0.08);border:1px solid rgba(247,118,142,0.2);color:var(--pink);}
 
   .disclaimer{background:rgba(247,118,142,0.06);border:1px solid rgba(247,118,142,0.2);border-radius:6px;padding:12px 16px;font-size:11px;color:var(--subtle);margin-top:16px;line-height:1.7;}
   .disclaimer strong{color:var(--pink);}
@@ -81,6 +89,8 @@
   .bl-p{background:rgba(187,154,247,0.2);color:var(--purple);}
   .bl-i{background:rgba(255,158,100,0.2);color:var(--orange);}
   .bl-e{background:rgba(115,218,202,0.2);color:var(--teal);}
+
+  .ai-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--teal);border:1px solid rgba(115,218,202,0.3);border-radius:4px;padding:2px 8px;margin-left:10px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -96,6 +106,7 @@
       <span class="pu">nurse</span><span class="pat">@</span><span class="ph">arch</span>
       <span style="color:var(--subtle)">:</span><span class="pp">~/tools</span>
       <span class="pa">❯</span><span class="pc">./soapie-note.sh --new</span>
+      <span class="ai-badge">✦ Gemini AI</span>
     </div>
 
     <div class="soapie-badge">
@@ -117,6 +128,7 @@
       <div class="field"><label>room / unit</label><input id="pt-room" placeholder="4B-201" /></div>
       <div class="field"><label>attending</label><input id="pt-md" placeholder="Dr. Smith" /></div>
       <div class="field"><label>nurse</label><input id="pt-rn" placeholder="Your Name, SN" /></div>
+      <div class="field" style="grid-column: span 2;"><label>nurse email (for AI-enhanced note delivery)</label><input id="pt-email" type="email" placeholder="nurse@email.com" /></div>
     </div>
 
     <div class="soap-grid">
@@ -280,10 +292,12 @@
 
     <div class="action-row">
       <button class="btn btn-primary" onclick="generateNote()">$ generate --soapie-note</button>
+      <button class="btn btn-ai" id="ai-btn" onclick="sendToAI()">✦ enhance with Gemini AI</button>
       <button class="btn btn-secondary" onclick="copyNote()">📋 copy to clipboard</button>
       <button class="btn btn-danger" onclick="clearAll()">🗑️ clear all</button>
     </div>
 
+    <div class="ai-status" id="ai-status"></div>
     <div class="output-box" id="output"></div>
 
     <div class="disclaimer">
@@ -308,66 +322,108 @@ function toggleChip(el){const val=el.textContent;el.classList.toggle('active');i
 
 function g(id){return document.getElementById(id).value.trim();}
 
+function collectData() {
+  return {
+    patient: {
+      initials: g('pt-init') || '[Patient]',
+      mrn: g('pt-mrn'),
+      age: g('pt-age'),
+      sex: g('pt-sex'),
+      date: g('pt-date'),
+      room: g('pt-room'),
+      attending: g('pt-md'),
+      nurse: g('pt-rn'),
+      email: g('pt-email')
+    },
+    subjective: {
+      chiefComplaint: [...ccList, g('s-cc')].filter(Boolean).join(', '),
+      painScore: g('s-pain'),
+      onset: g('s-onset'),
+      history: g('s-hx')
+    },
+    objective: {
+      bp: g('o-bp'), hr: g('o-hr'), rr: g('o-rr'),
+      temp: g('o-temp'), spo2: g('o-spo2'), painScore: g('o-pain'),
+      appearance: appearList.join(', '),
+      exam: g('o-exam')
+    },
+    assessment: {
+      diagnoses: [...ndList, g('a-dx')].filter(Boolean).join('; '),
+      notes: g('a-notes')
+    },
+    plan: {
+      interventions: [...intList, g('p-plan')].filter(Boolean),
+      education: g('p-edu')
+    },
+    implementation: {
+      actions: [...implList, g('i-actions')].filter(Boolean),
+      times: g('i-time')
+    },
+    evaluation: {
+      responses: [...evalList, g('e-notes')].filter(Boolean),
+      painAfter: g('e-pain'),
+      followup: g('e-followup')
+    }
+  };
+}
+
 function generateNote(){
-  const init=g('pt-init')||'[Patient]';
-  const age=g('pt-age');const sex=g('pt-sex');const mrn=g('pt-mrn');
-  const date=g('pt-date');const room=g('pt-room');const md=g('pt-md');const rn=g('pt-rn');
-  const cc=[...ccList,g('s-cc')].filter(Boolean).join(', ');
-  const pain=g('s-pain');const onset=g('s-onset');const hx=g('s-hx');
-  const bp=g('o-bp');const hr=g('o-hr');const rr=g('o-rr');const temp=g('o-temp');const spo2=g('o-spo2');const opain=g('o-pain');
-  const appear=[...appearList].join(', ');const exam=g('o-exam');
-  const dx=[...ndList,g('a-dx')].filter(Boolean).join('; ');const anotes=g('a-notes');
-  const plan=[...intList,g('p-plan')].filter(Boolean);const edu=g('p-edu');
-  const impl=[...implList,g('i-actions')].filter(Boolean);const itime=g('i-time');
-  const eval_=[...evalList,g('e-notes')].filter(Boolean);const epain=g('e-pain');const followup=g('e-followup');
+  const d = collectData();
+  const p = d.patient;
+  const s = d.subjective;
+  const o = d.objective;
+  const a = d.assessment;
+  const pl = d.plan;
+  const i = d.implementation;
+  const e = d.evaluation;
 
   let note=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NURSING SOAPIE NOTE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Patient: ${init}${age?` | Age: ${age}`:''}${sex?` | Sex: ${sex}`:''}${mrn?` | MRN: ${mrn}`:''}
-Date: ${date||new Date().toLocaleDateString()}${room?` | Room: ${room}`:''}
-Attending: ${md||'--'} | Documented by: ${rn||'--'}
+Patient: ${p.initials}${p.age?` | Age: ${p.age}`:''}${p.sex?` | Sex: ${p.sex}`:''}${p.mrn?` | MRN: ${p.mrn}`:''}
+Date: ${p.date||new Date().toLocaleDateString()}${p.room?` | Room: ${p.room}`:''}
+Attending: ${p.attending||'--'} | Documented by: ${p.nurse||'--'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [S] SUBJECTIVE
 ──────────────
-Chief Complaint: ${cc||'Not documented'}
-${pain?`Pain Score: ${pain}/10\n`:''}${onset?`Onset/Duration: ${onset}\n`:''}${hx?`History/Notes: ${hx}\n`:''}
+Chief Complaint: ${s.chiefComplaint||'Not documented'}
+${s.painScore?`Pain Score: ${s.painScore}/10\n`:''}${s.onset?`Onset/Duration: ${s.onset}\n`:''}${s.history?`History/Notes: ${s.history}\n`:''}
 [O] OBJECTIVE
 ──────────────
 Vitals:
-  BP: ${bp||'--'} mmHg    HR: ${hr||'--'} bpm
-  RR: ${rr||'--'} br/min  Temp: ${temp||'--'}C
-  SpO2: ${spo2||'--'}%    Pain: ${opain||'--'}/10
-${appear?`\nGeneral Appearance: ${appear}`:''}
-${exam?`\nExam/Labs: ${exam}`:''}
+  BP: ${o.bp||'--'} mmHg    HR: ${o.hr||'--'} bpm
+  RR: ${o.rr||'--'} br/min  Temp: ${o.temp||'--'}C
+  SpO2: ${o.spo2||'--'}%    Pain: ${o.painScore||'--'}/10
+${o.appearance?`\nGeneral Appearance: ${o.appearance}`:''}
+${o.exam?`\nExam/Labs: ${o.exam}`:''}
 
 [A] ASSESSMENT
 ──────────────
-${dx||'Nursing diagnosis not documented'}
-${anotes?`\nNotes: ${anotes}`:''}
+${a.diagnoses||'Nursing diagnosis not documented'}
+${a.notes?`\nNotes: ${a.notes}`:''}
 
 [P] PLAN
 ──────────────
 Planned Interventions:
-${plan.length?plan.map(i=>`  - ${i}`).join('\n'):'  - No plan documented'}
-${edu?`\nEducation Plan: ${edu}`:''}
+${pl.interventions.length?pl.interventions.map(i=>`  - ${i}`).join('\n'):'  - No plan documented'}
+${pl.education?`\nEducation Plan: ${pl.education}`:''}
 
 [I] IMPLEMENTATION
 ──────────────────
 Actions Performed:
-${impl.length?impl.map(i=>`  - ${i}`).join('\n'):'  - No interventions documented'}
-${itime?`\nKey Intervention Times: ${itime}`:''}
+${i.actions.length?i.actions.map(a=>`  - ${a}`).join('\n'):'  - No interventions documented'}
+${i.times?`\nKey Intervention Times: ${i.times}`:''}
 
 [E] EVALUATION
 ──────────────
 Patient Response:
-${eval_.length?eval_.map(i=>`  - ${i}`).join('\n'):'  - Evaluation not documented'}
-${epain?`\nPain Score Post-Intervention: ${epain}/10`:''}
-${followup?`\nFollow-up Plan: ${followup}`:''}
+${e.responses.length?e.responses.map(r=>`  - ${r}`).join('\n'):'  - Evaluation not documented'}
+${e.painAfter?`\nPain Score Post-Intervention: ${e.painAfter}/10`:''}
+${e.followup?`\nFollow-up Plan: ${e.followup}`:''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Documented by: ${rn||'[Nurse Name, SN]'} | ${date||new Date().toLocaleDateString()}
+Documented by: ${p.nurse||'[Nurse Name, SN]'} | ${p.date||new Date().toLocaleDateString()}
 [EDUCATIONAL USE ONLY -- NOT FOR ACTUAL PATIENT RECORDS]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
@@ -377,12 +433,52 @@ Documented by: ${rn||'[Nurse Name, SN]'} | ${date||new Date().toLocaleDateString
   box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+async function sendToAI() {
+  const data = collectData();
+  const email = data.patient.email;
+
+  if (!email) {
+    showStatus('error', '✗ Please enter your nurse email address before sending to AI.');
+    return;
+  }
+
+  const btn = document.getElementById('ai-btn');
+  btn.disabled = true;
+  btn.textContent = '⟳ sending to Gemini...';
+  showStatus('loading', '✦ Sending note data to Gemini AI via Make.com — this may take 15–30 seconds...');
+
+  try {
+    const res = await fetch('https://hook.us2.make.com/bb4698gw6cv94h8iejghfwbzui8173ls', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      showStatus('success', '✓ Note data sent successfully! Check your email for the AI-enhanced SOAPIE note.');
+    } else {
+      showStatus('error', '✗ Webhook returned an error. Check your Make.com scenario is active.');
+    }
+  } catch (err) {
+    showStatus('error', '✗ Failed to reach webhook. Make sure your Make.com scenario is turned ON.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✦ enhance with Gemini AI';
+}
+
+function showStatus(type, msg) {
+  const el = document.getElementById('ai-status');
+  el.className = `ai-status ${type}`;
+  el.textContent = msg;
+}
+
 function copyNote(){
   const box=document.getElementById('output');
   if(!box.textContent){generateNote();}
   navigator.clipboard.writeText(box.textContent).then(()=>{
     const btn=document.querySelector('.btn-secondary');
-    btn.textContent='checked copied!';
+    btn.textContent='✓ copied!';
     setTimeout(()=>btn.textContent='📋 copy to clipboard',2000);
   });
 }
@@ -394,6 +490,8 @@ function clearAll(){
   ccList=[];ndList=[];intList=[];implList=[];evalList=[];appearList=[];
   document.getElementById('output').classList.remove('show');
   document.getElementById('output').textContent='';
+  document.getElementById('ai-status').className='ai-status';
+  document.getElementById('ai-status').textContent='';
   document.getElementById('pt-date').value=new Date().toISOString().split('T')[0];
 }
 </script>
