@@ -900,7 +900,7 @@
             <div class="skill-bar"><div class="skill-fill" style="width:52%;background:var(--purple)"></div></div>
           </div>
           <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Computer Trooubleshooting</span><span class="sbr-pct">67%</span></div>
+            <div class="sbr-top"><span class="sbr-name">Computer Troubleshooting</span><span class="sbr-pct">67%</span></div>
             <div class="skill-bar"><div class="skill-fill" style="width:52%;background:var(--purple)"></div></div>
           </div>
         </div>
@@ -975,7 +975,7 @@
               <textarea class="cf-textarea" rows="4" placeholder="Hello, I wanted to reach out about..."></textarea>
             </div>
 
-            <button class="cf-btn" onclick="this.textContent='✓ sent!'">
+            <button class="cf-btn" id="contact-btn" onclick="submitContactForm()">
               $ submit --message
             </button>
           </div>
@@ -1048,5 +1048,34 @@
 </section>
 
 </div><!-- kitty-root -->
+<script>
+async function submitContactForm() {
+  const name = document.querySelector('.cf-input[type="text"]').value.trim();
+  const email = document.querySelector('.cf-input[type="email"]').value.trim();
+  const message = document.querySelector('.cf-textarea').value.trim();
+  const btn = document.getElementById('contact-btn');
+
+  if (!name || !email || !message) {
+    btn.textContent = '✗ fill all fields';
+    setTimeout(() => btn.textContent = '$ submit --message', 2000);
+    return;
+  }
+
+  btn.textContent = '⟳ sending...';
+  btn.disabled = true;
+
+  try {
+    await fetch('https://hook.us2.make.com/0ywjh3ukhquh3scvcreg6kdswpa8q9vg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+    btn.textContent = '✓ sent!';
+  } catch {
+    btn.textContent = '✗ error — try again';
+    btn.disabled = false;
+  }
+}
+</script>
 </body>
 </html>
