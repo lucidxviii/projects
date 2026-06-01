@@ -1085,6 +1085,13 @@ async function submitContactForm() {
     return;
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    btn.textContent = '✗ invalid email';
+    setTimeout(() => btn.textContent = '$ submit --message', 2000);
+    return;
+  }
+
   btn.textContent = '⟳ sending...';
   btn.disabled = true;
 
