@@ -308,6 +308,7 @@
 </div>
 
 <script>
+<script>
 document.getElementById('pt-date').value = new Date().toISOString().split('T')[0];
 
 let ccList=[], ndList=[], intList=[], implList=[], evalList=[];
@@ -321,6 +322,20 @@ function toggleEval(el,val){el.classList.toggle('active');if(el.classList.contai
 function toggleChip(el){const val=el.textContent;el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--blue)';el.style.borderColor='var(--blue)';el.style.color='var(--bg)';appearList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';appearList=appearList.filter(v=>v!==val);}}
 
 function g(id){return document.getElementById(id).value.trim();}
+
+function validate() {
+  const initials = g('pt-init');
+  const cc = [...ccList, g('s-cc')].filter(Boolean).join(', ');
+  if (!initials) {
+    showStatus('error', '✗ Patient initials are required.');
+    return false;
+  }
+  if (!cc) {
+    showStatus('error', '✗ Chief complaint is required — select a chip or enter free text.');
+    return false;
+  }
+  return true;
+}
 
 function collectData() {
   return {
@@ -368,6 +383,7 @@ function collectData() {
 }
 
 function generateNote(){
+  if (!validate()) return;
   const d = collectData();
   const p = d.patient;
   const s = d.subjective;
@@ -434,6 +450,7 @@ Documented by: ${p.nurse||'[Nurse Name, SN]'} | ${p.date||new Date().toLocaleDat
 }
 
 async function sendToAI() {
+  if (!validate()) return;
   const data = collectData();
   const email = data.patient.email;
 
