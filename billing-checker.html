@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Billing Error Checker — Luke Thomas Rivas</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#1a1b26;--bg2:#16161e;--bg3:#1f2335;--panel:#24283b;--border:#2a2e42;
+    --text:#c0caf5;--subtle:#565f89;--pink:#f7768e;--orange:#ff9e64;--yellow:#e0af68;
+    --green:#9ece6a;--teal:#73daca;--cyan:#7dcfff;--blue:#7aa2f7;--purple:#bb9af7;--white:#a9b1d6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.6;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999;}
+
+  .root{max-width:900px;margin:30px auto;padding:0 16px 60px;}
+
+  .back-link{display:inline-flex;align-items:center;gap:8px;color:var(--subtle);font-size:12px;text-decoration:none;margin-bottom:16px;transition:color 0.15s;}
+  .back-link:hover{color:var(--blue);}
+
+  .window{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px rgba(122,162,247,0.08),0 24px 80px rgba(0,0,0,0.6);margin-bottom:20px;animation:fadeSlide 0.5s ease both;}
+  @keyframes fadeSlide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  .titlebar{background:var(--bg3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;user-select:none;}
+  .dots{display:flex;gap:7px;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot-r{background:var(--pink);box-shadow:0 0 6px var(--pink);}
+  .dot-y{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+  .dot-g{background:var(--green);box-shadow:0 0 6px var(--green);}
+  .tab{padding:2px 14px;border-radius:4px 4px 0 0;font-size:12px;color:var(--blue);background:var(--bg2);border:1px solid var(--border);border-bottom:none;margin-left:10px;}
+
+  .body{padding:24px;}
+
+  .prompt{display:flex;align-items:baseline;flex-wrap:wrap;margin-bottom:4px;font-size:13px;}
+  .p-user{color:var(--green);font-weight:600;}
+  .p-at{color:var(--subtle);}
+  .p-host{color:var(--blue);font-weight:600;}
+  .p-sep{color:var(--subtle);margin:0 2px;}
+  .p-path{color:var(--yellow);}
+  .p-arrow{color:var(--pink);margin-left:6px;font-weight:700;}
+  .p-cmd{color:var(--text);margin-left:6px;}
+  .p-arg{color:var(--cyan);margin-left:6px;}
+
+  .sec-comment{color:var(--subtle);font-size:12px;margin-bottom:16px;font-style:italic;}
+  .sec-comment::before{content:'# ';color:var(--green);}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .form-grid.single{grid-template-columns:1fr;}
+  .form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11px;color:var(--subtle);}
+  .field label::before{content:'--';color:var(--orange);margin-right:4px;}
+  .field input,.field textarea,.field select{
+    background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+    padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;
+    font-size:12px;outline:none;transition:border-color 0.15s;resize:vertical;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);}
+  .field select option{background:var(--bg3);}
+
+  .btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;}
+  .btn{border:none;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:10px 20px;cursor:pointer;transition:opacity 0.2s,transform 0.15s;}
+  .btn:hover{opacity:0.88;transform:translateY(-1px);}
+  .btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:var(--bg);}
+  .btn-secondary{background:var(--panel);color:var(--subtle);border:1px solid var(--border);}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+  .status-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--subtle);margin-top:10px;min-height:20px;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--subtle);}
+  .status-dot.thinking{background:var(--yellow);animation:blink 1s ease infinite;}
+  .status-dot.done{background:var(--green);}
+  .status-dot.error{background:var(--pink);}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+  .results-block{margin-top:18px;display:none;}
+  .results-block.visible{display:block;animation:fadeSlide 0.4s ease both;}
+
+  .result-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;}
+  .result-card.clean{border-color:rgba(158,206,106,0.3);}
+  .result-card.warnings{border-color:rgba(224,175,104,0.3);}
+  .result-card.errors{border-color:rgba(247,118,142,0.3);}
+
+  .result-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;font-weight:600;}
+  .result-icon{font-size:16px;}
+  .result-body{font-size:12px;color:var(--white);line-height:1.9;white-space:pre-wrap;word-break:break-word;}
+
+  .error-item{padding:6px 10px;border-radius:4px;margin-bottom:6px;font-size:12px;line-height:1.7;}
+  .error-item.err{background:rgba(247,118,142,0.08);border-left:3px solid var(--pink);color:var(--white);}
+  .error-item.warn{background:rgba(224,175,104,0.08);border-left:3px solid var(--yellow);color:var(--white);}
+  .error-item.info{background:rgba(115,218,202,0.08);border-left:3px solid var(--teal);color:var(--white);}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:3px;border:1px solid;}
+  .badge-teal{color:var(--teal);border-color:rgba(115,218,202,0.3);background:rgba(115,218,202,0.08);}
+  .badge-orange{color:var(--orange);border-color:rgba(255,158,100,0.3);background:rgba(255,158,100,0.08);}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease infinite;}
+
+  .copy-btn{font-size:10px;color:var(--purple);background:none;border:1px solid rgba(187,154,247,0.3);border-radius:3px;padding:2px 8px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:color 0.15s;}
+  .copy-btn:hover{color:var(--pink);}
+
+  .hint{font-size:11px;color:var(--subtle);margin-top:4px;}
+
+  @media(max-width:600px){.form-grid,.form-grid.three{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="root">
+
+  <a class="back-link" href="index.html">← back to portfolio</a>
+
+  <div class="window">
+    <div class="titlebar">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <div class="tab">🔍 billing-checker.sh</div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+        <span class="badge badge-teal">Claude API</span>
+        <span class="badge badge-orange"><span class="live-dot"></span> live</span>
+      </div>
+    </div>
+    <div class="body">
+      <p class="sec-comment">Flags ICD-10 coding errors, mismatched CPT codes, and missing modifiers using AI</p>
+      <div class="prompt">
+        <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+        <span class="p-sep">:</span><span class="p-path">~/projects/billing-checker</span>
+        <span class="p-arrow">❯</span>
+        <span class="p-cmd">./check.sh</span><span class="p-arg">--icd10 --cpt --modifiers</span>
+      </div>
+
+      <div style="margin-top:20px;">
+
+        <div class="form-grid">
+          <div class="field">
+            <label>patient-name</label>
+            <input type="text" id="pt-name" placeholder="Juan dela Cruz" />
+          </div>
+          <div class="field">
+            <label>date-of-service</label>
+            <input type="date" id="dos" />
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>icd-10-codes (comma separated)</label>
+            <input type="text" id="icd10" placeholder="e.g. J18.9, Z87.891, I10" />
+            <span class="hint">principal diagnosis first</span>
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>cpt-codes (comma separated)</label>
+            <input type="text" id="cpt" placeholder="e.g. 99213, 71046, 93000" />
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>modifiers (if any)</label>
+            <input type="text" id="modifiers" placeholder="e.g. 25, 59, GT" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>place-of-service</label>
+            <select id="pos">
+              <option value="">select POS</option>
+              <option value="11">11 - Office</option>
+              <option value="21">21 - Inpatient Hospital</option>
+              <option value="22">22 - Outpatient Hospital</option>
+              <option value="23">23 - Emergency Room</option>
+              <option value="02">02 - Telehealth</option>
+              <option value="31">31 - Skilled Nursing Facility</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>payer-type</label>
+            <select id="payer">
+              <option value="">select payer</option>
+              <option>Medicare</option>
+              <option>Medicaid</option>
+              <option>Commercial Insurance</option>
+              <option>Self-Pay</option>
+              <option>Workers Compensation</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>clinical-notes (optional, helps AI give better analysis)</label>
+            <textarea id="notes" rows="3" placeholder="e.g. Patient presented with fever and cough. Chest X-ray ordered. Follow-up visit, separate procedure performed same day."></textarea>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="check-btn" onclick="checkBilling()">$ run --error-check</button>
+          <button class="btn btn-secondary" onclick="clearForm()">clear</button>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">ready</span>
+        </div>
+
+        <div class="results-block" id="results-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--subtle);font-style:italic;">
+              <span style="color:var(--green)"># </span>analysis results
+            </div>
+            <button class="copy-btn" onclick="copyResults()">copy report</button>
+          </div>
+          <div id="results-content"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK = 'https://hook.us2.make.com/REPLACE_WITH_BILLING_WEBHOOK';
+
+function setStatus(state, msg) {
+  document.getElementById('status-dot').className = 'status-dot ' + state;
+  document.getElementById('status-text').textContent = msg;
+}
+
+function renderResults(text) {
+  const container = document.getElementById('results-content');
+  container.innerHTML = '';
+
+  // Try to parse structured response, fall back to plain text
+  let parsed = null;
+  try {
+    const clean = text.replace(/```json|```/g, '').trim();
+    parsed = JSON.parse(clean);
+  } catch {}
+
+  if (parsed && (parsed.errors || parsed.warnings || parsed.suggestions || parsed.summary)) {
+    // Structured output
+    if (parsed.summary) {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `<div class="result-header"><span class="result-icon">📋</span><span style="color:var(--teal)">summary</span></div><div class="result-body">${parsed.summary}</div>`;
+      container.appendChild(card);
+    }
+
+    if (parsed.errors && parsed.errors.length > 0) {
+      const card = document.createElement('div');
+      card.className = 'result-card errors';
+      let html = `<div class="result-header"><span class="result-icon">❌</span><span style="color:var(--pink)">errors (${parsed.errors.length})</span></div>`;
+      parsed.errors.forEach(e => { html += `<div class="error-item err">${e}</div>`; });
+      card.innerHTML = html;
+      container.appendChild(card);
+    }
+
+    if (parsed.warnings && parsed.warnings.length > 0) {
+      const card = document.createElement('div');
+      card.className = 'result-card warnings';
+      let html = `<div class="result-header"><span class="result-icon">⚠️</span><span style="color:var(--yellow)">warnings (${parsed.warnings.length})</span></div>`;
+      parsed.warnings.forEach(w => { html += `<div class="error-item warn">${w}</div>`; });
+      card.innerHTML = html;
+      container.appendChild(card);
+    }
+
+    if (parsed.suggestions && parsed.suggestions.length > 0) {
+      const card = document.createElement('div');
+      card.className = 'result-card clean';
+      let html = `<div class="result-header"><span class="result-icon">💡</span><span style="color:var(--green)">suggestions</span></div>`;
+      parsed.suggestions.forEach(s => { html += `<div class="error-item info">${s}</div>`; });
+      card.innerHTML = html;
+      container.appendChild(card);
+    }
+
+    if (!parsed.errors?.length && !parsed.warnings?.length) {
+      const card = document.createElement('div');
+      card.className = 'result-card clean';
+      card.innerHTML = `<div class="result-header"><span class="result-icon">✅</span><span style="color:var(--green)">no critical errors found</span></div><div class="result-body">Billing entry looks clean. Review suggestions above if any.</div>`;
+      container.appendChild(card);
+    }
+  } else {
+    // Plain text fallback
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `<div class="result-header"><span class="result-icon">📋</span><span style="color:var(--teal)">analysis</span></div><div class="result-body">${text}</div>`;
+    container.appendChild(card);
+  }
+}
+
+async function checkBilling() {
+  const icd10 = document.getElementById('icd10').value.trim();
+  const cpt = document.getElementById('cpt').value.trim();
+
+  if (!icd10 && !cpt) {
+    setStatus('error', 'enter at least one ICD-10 or CPT code to check');
+    return;
+  }
+
+  const payload = {
+    patientName:   document.getElementById('pt-name').value.trim(),
+    dateOfService: document.getElementById('dos').value,
+    icd10Codes:    icd10,
+    cptCodes:      cpt,
+    modifiers:     document.getElementById('modifiers').value.trim(),
+    placeOfService:document.getElementById('pos').value,
+    payerType:     document.getElementById('payer').value,
+    clinicalNotes: document.getElementById('notes').value.trim(),
+  };
+
+  const btn = document.getElementById('check-btn');
+  btn.disabled = true;
+  setStatus('thinking', 'analyzing billing codes...');
+  document.getElementById('results-block').classList.remove('visible');
+
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    renderResults(text);
+    document.getElementById('results-block').classList.add('visible');
+    setStatus('done', 'analysis complete');
+  } catch (err) {
+    setStatus('error', 'webhook error — check Make scenario');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function copyResults() {
+  const content = document.getElementById('results-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy report', 1500);
+  });
+}
+
+function clearForm() {
+  ['pt-name','dos','icd10','cpt','modifiers','notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('pos').value = '';
+  document.getElementById('payer').value = '';
+  document.getElementById('results-block').classList.remove('visible');
+  setStatus('', 'ready');
+}
+</script>
+</body>
+</html>

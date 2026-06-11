@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discharge Summary Generator — Luke Thomas Rivas</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#1a1b26;--bg2:#16161e;--bg3:#1f2335;--panel:#24283b;--border:#2a2e42;
+    --text:#c0caf5;--subtle:#565f89;--pink:#f7768e;--orange:#ff9e64;--yellow:#e0af68;
+    --green:#9ece6a;--teal:#73daca;--cyan:#7dcfff;--blue:#7aa2f7;--purple:#bb9af7;--white:#a9b1d6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.6;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999;}
+
+  .root{max-width:900px;margin:30px auto;padding:0 16px 60px;}
+
+  .back-link{display:inline-flex;align-items:center;gap:8px;color:var(--subtle);font-size:12px;text-decoration:none;margin-bottom:16px;transition:color 0.15s;}
+  .back-link:hover{color:var(--blue);}
+
+  .window{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px rgba(122,162,247,0.08),0 24px 80px rgba(0,0,0,0.6);margin-bottom:20px;animation:fadeSlide 0.5s ease both;}
+  @keyframes fadeSlide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  .titlebar{background:var(--bg3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;user-select:none;}
+  .dots{display:flex;gap:7px;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot-r{background:var(--pink);box-shadow:0 0 6px var(--pink);}
+  .dot-y{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+  .dot-g{background:var(--green);box-shadow:0 0 6px var(--green);}
+  .tab{padding:2px 14px;border-radius:4px 4px 0 0;font-size:12px;color:var(--blue);background:var(--bg2);border:1px solid var(--border);border-bottom:none;margin-left:10px;}
+
+  .body{padding:24px;}
+
+  .prompt{display:flex;align-items:baseline;flex-wrap:wrap;margin-bottom:4px;font-size:13px;}
+  .p-user{color:var(--green);font-weight:600;}
+  .p-at{color:var(--subtle);}
+  .p-host{color:var(--blue);font-weight:600;}
+  .p-sep{color:var(--subtle);margin:0 2px;}
+  .p-path{color:var(--yellow);}
+  .p-arrow{color:var(--pink);margin-left:6px;font-weight:700;}
+  .p-cmd{color:var(--text);margin-left:6px;}
+  .p-arg{color:var(--cyan);margin-left:6px;}
+
+  .sec-comment{color:var(--subtle);font-size:12px;margin-bottom:16px;font-style:italic;}
+  .sec-comment::before{content:'# ';color:var(--green);}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .form-grid.single{grid-template-columns:1fr;}
+
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11px;color:var(--subtle);}
+  .field label::before{content:'--';color:var(--orange);margin-right:4px;}
+  .field input,.field textarea,.field select{
+    background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+    padding:8px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;
+    font-size:12px;outline:none;transition:border-color 0.15s;resize:vertical;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);}
+  .field select option{background:var(--bg3);}
+
+  .btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;}
+  .btn{border:none;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:10px 20px;cursor:pointer;transition:opacity 0.2s,transform 0.15s;}
+  .btn:hover{opacity:0.88;transform:translateY(-1px);}
+  .btn-primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:var(--bg);}
+  .btn-secondary{background:var(--panel);color:var(--teal);border:1px solid var(--border);}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+  .output-block{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:18px;margin-top:18px;display:none;}
+  .output-block.visible{display:block;animation:fadeSlide 0.4s ease both;}
+  .output-label{font-size:11px;color:var(--subtle);margin-bottom:12px;}
+  .output-label::before{content:'# ';color:var(--green);}
+  .output-content{color:var(--white);font-size:12px;line-height:1.9;white-space:pre-wrap;word-break:break-word;}
+
+  .status-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--subtle);margin-top:10px;min-height:20px;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--subtle);}
+  .status-dot.thinking{background:var(--yellow);animation:blink 1s ease infinite;}
+  .status-dot.done{background:var(--green);}
+  .status-dot.error{background:var(--pink);}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+  .copy-btn{font-size:10px;color:var(--purple);background:none;border:1px solid rgba(187,154,247,0.3);border-radius:3px;padding:2px 8px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:color 0.15s;float:right;}
+  .copy-btn:hover{color:var(--pink);}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:3px;border:1px solid;}
+  .badge-blue{color:var(--blue);border-color:rgba(122,162,247,0.3);background:rgba(122,162,247,0.08);}
+  .badge-orange{color:var(--orange);border-color:rgba(255,158,100,0.3);background:rgba(255,158,100,0.08);}
+
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease infinite;}
+
+  @media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="root">
+
+  <a class="back-link" href="index.html">← back to portfolio</a>
+
+  <div class="window">
+    <div class="titlebar">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <div class="tab">📄 discharge-summary.sh</div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+        <span class="badge badge-blue">Make webhook</span>
+        <span class="badge badge-orange"><span class="live-dot"></span> live</span>
+      </div>
+    </div>
+    <div class="body">
+      <p class="sec-comment">Generates a structured patient discharge summary using Claude AI via Make webhook</p>
+      <div class="prompt">
+        <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
+        <span class="p-sep">:</span><span class="p-path">~/projects/discharge-summary</span>
+        <span class="p-arrow">❯</span>
+        <span class="p-cmd">./generate.sh</span><span class="p-arg">--ai-powered</span>
+      </div>
+
+      <div style="margin-top:20px;">
+
+        <div class="form-grid">
+          <div class="field">
+            <label>patient-name</label>
+            <input type="text" id="pt-name" placeholder="Juan dela Cruz" />
+          </div>
+          <div class="field">
+            <label>age</label>
+            <input type="number" id="pt-age" placeholder="45" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>admission-date</label>
+            <input type="date" id="admit-date" />
+          </div>
+          <div class="field">
+            <label>discharge-date</label>
+            <input type="date" id="discharge-date" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>admitting-diagnosis</label>
+            <input type="text" id="admit-dx" placeholder="e.g. Community-acquired pneumonia" />
+          </div>
+          <div class="field">
+            <label>discharge-diagnosis</label>
+            <input type="text" id="discharge-dx" placeholder="e.g. Resolved CAP, stable" />
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>hospital-course (brief summary)</label>
+            <textarea id="hosp-course" rows="3" placeholder="e.g. Patient admitted with fever and productive cough. Started on IV antibiotics, improved after 48hrs. O2 sats normalized. Afebrile for 24hrs prior to discharge."></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>discharge-medications</label>
+            <textarea id="meds" rows="2" placeholder="e.g. Amoxicillin 500mg TID x 5 days, Paracetamol 500mg PRN fever"></textarea>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>follow-up</label>
+            <input type="text" id="followup" placeholder="e.g. OPD in 1 week, Dr. Santos" />
+          </div>
+          <div class="field">
+            <label>condition-at-discharge</label>
+            <select id="condition">
+              <option value="">select condition</option>
+              <option>Stable</option>
+              <option>Improved</option>
+              <option>Recovered</option>
+              <option>Fair</option>
+              <option>Against medical advice</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid single">
+          <div class="field">
+            <label>recipient-email (for delivery)</label>
+            <input type="email" id="recipient-email" placeholder="doctor@clinic.com" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="gen-btn" onclick="generateSummary()">$ generate --send-via-make</button>
+          <button class="btn btn-secondary" onclick="clearForm()">clear</button>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">ready</span>
+        </div>
+
+        <div class="output-block" id="output-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="output-label" style="margin:0;">generated discharge summary</div>
+            <button class="copy-btn" onclick="copySummary()">copy</button>
+          </div>
+          <div class="output-content" id="output-content"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK = 'https://hook.us2.make.com/REPLACE_WITH_DISCHARGE_WEBHOOK';
+
+function setStatus(state, msg) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = msg;
+}
+
+async function generateSummary() {
+  const fields = {
+    patientName:       document.getElementById('pt-name').value.trim(),
+    age:               document.getElementById('pt-age').value.trim(),
+    admissionDate:     document.getElementById('admit-date').value,
+    dischargeDate:     document.getElementById('discharge-date').value,
+    admittingDiagnosis:document.getElementById('admit-dx').value.trim(),
+    dischargeDiagnosis:document.getElementById('discharge-dx').value.trim(),
+    hospitalCourse:    document.getElementById('hosp-course').value.trim(),
+    medications:       document.getElementById('meds').value.trim(),
+    followUp:          document.getElementById('followup').value.trim(),
+    condition:         document.getElementById('condition').value,
+    recipientEmail:    document.getElementById('recipient-email').value.trim(),
+  };
+
+  if (!fields.patientName || !fields.admittingDiagnosis || !fields.hospitalCourse) {
+    setStatus('error', 'fill in patient name, admitting diagnosis, and hospital course');
+    return;
+  }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  setStatus('thinking', 'sending to Make webhook...');
+  document.getElementById('output-block').classList.remove('visible');
+
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fields)
+    });
+
+    const text = await res.text();
+    let summary = text;
+    try { const json = JSON.parse(text); summary = json.summary || json.result || json.output || text; } catch {}
+
+    document.getElementById('output-content').textContent = summary;
+    document.getElementById('output-block').classList.add('visible');
+    setStatus('done', fields.recipientEmail ? 'summary generated and sent to ' + fields.recipientEmail : 'summary generated');
+  } catch (err) {
+    setStatus('error', 'webhook error — check Make scenario');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function copySummary() {
+  const content = document.getElementById('output-content').textContent;
+  navigator.clipboard.writeText(content).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+
+function clearForm() {
+  ['pt-name','pt-age','admit-date','discharge-date','admit-dx','discharge-dx','hosp-course','meds','followup','recipient-email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('condition').value = '';
+  document.getElementById('output-block').classList.remove('visible');
+  setStatus('', 'ready');
+}
+</script>
+</body>
+</html>

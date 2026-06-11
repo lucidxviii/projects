@@ -188,6 +188,24 @@
   .nf-colors { display: flex; gap: 4px; margin-top: 10px; }
   .cc { width: 18px; height: 18px; border-radius: 3px; }
 
+  /* Section sub-header for project categories */
+  .projects-section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .projects-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
   .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
   .project-card {
     background: var(--panel);
@@ -198,16 +216,41 @@
     cursor: default;
   }
   .project-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(122,162,247,0.12); }
+  .project-card.automation:hover { border-color: var(--orange); box-shadow: 0 8px 30px rgba(255,158,100,0.12); }
   .pc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .pc-name { font-weight: 600; color: var(--blue); font-size: 13px; }
+  .project-card.automation .pc-name { color: var(--orange); }
   .pc-lang { font-size: 11px; display: flex; align-items: center; gap: 5px; color: var(--subtle); }
   .lang-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
   .pc-desc { color: var(--white); font-size: 12px; line-height: 1.7; margin-bottom: 10px; }
   .pc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
   .pc-tag { font-size: 10px; color: var(--teal); background: rgba(115,218,202,0.08); border: 1px solid rgba(115,218,202,0.2); border-radius: 3px; padding: 1px 7px; }
+  .project-card.automation .pc-tag { color: var(--orange); background: rgba(255,158,100,0.08); border-color: rgba(255,158,100,0.2); }
   .pc-links { margin-top: 12px; display: flex; gap: 10px; }
   .pc-link { font-size: 11px; color: var(--purple); text-decoration: none; border-bottom: 1px solid rgba(187,154,247,0.3); transition: color 0.15s; }
   .pc-link:hover { color: var(--pink); }
+
+  /* Live badge */
+  .pc-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--green);
+    background: rgba(158,206,106,0.1);
+    border: 1px solid rgba(158,206,106,0.25);
+    border-radius: 3px;
+    padding: 1px 7px;
+  }
+  .pc-live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
   .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
   .skill-group { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
@@ -435,6 +478,120 @@
       <span class="p-cmd">ls</span><span class="p-flag">--color=auto</span>
     </div>
     <div class="output">
+
+      <!-- AUTOMATIONS -->
+      <div class="projects-section-label" style="color:var(--orange)">🔄 automations/</div>
+      <div class="projects-grid">
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">📋 SOAPIE Note Builder + AI</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Make / Gemini</span>
+          </div>
+          <p class="pc-desc">Structured SOAPIE note generator integrated with Gemini AI via a Make webhook — automatically generates and emails a complete clinical nursing note from input data. No manual formatting required.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">SOAPIE</span><span class="pc-tag">Gemini API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">Gmail</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="soapie-note.html">[open tool]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">🏥 Patient Intake Confirmation</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
+          </div>
+          <p class="pc-desc">Patient intake form submitted via portfolio contact webhook triggers a Zapier flow — parses patient data, sends a formatted confirmation email, and logs the entry to a Google Sheet.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">Gmail</span><span class="pc-tag">Google Sheets</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="#contact">[trigger via form]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">📅 Appointment Request Flow</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
+          </div>
+          <p class="pc-desc">Appointment requests submitted through the portfolio contact form are caught by a Zapier webhook, auto-replied with scheduling instructions, and queued in a tracking sheet for follow-up.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">auto-reply</span><span class="pc-tag">scheduling</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="#contact">[trigger via form]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">🚨 AI Symptom Triage System</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>n8n / Claude</span>
+          </div>
+          <p class="pc-desc">Symptom input triggers an n8n workflow that scores urgency using AI, branches into low/moderate/high-priority response paths, and sends a tailored triage email with recommended next steps.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">n8n</span><span class="pc-tag">AI triage</span><span class="pc-tag">urgency scoring</span><span class="pc-tag">branching logic</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="#" target="_blank">[view workflow]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">📄 Discharge Summary Generator</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--blue)"></span>Make / Claude API</span>
+          </div>
+          <p class="pc-desc">Patient data submitted via form triggers a Make webhook that calls the Claude API to generate a structured discharge summary — including diagnosis, medications, follow-up instructions, and precautions — then emails it automatically.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Claude API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">discharge notes</span><span class="pc-tag">Gmail</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="discharge-summary.html">[open tool]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">⏰ Appointment Reminder SMS</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Make / Twilio</span>
+          </div>
+          <p class="pc-desc">Scheduled appointments logged in a Google Sheet trigger a Make automation that sends a personalized SMS reminder via Twilio 24 hours before the appointment time — reducing no-shows without manual follow-up.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Make</span><span class="pc-tag">Twilio SMS</span><span class="pc-tag">Google Sheets</span><span class="pc-tag">scheduling</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="#" target="_blank">[view workflow]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">🔍 Medical Billing Error Checker</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--teal)"></span>Make / Claude API</span>
+          </div>
+          <p class="pc-desc">Billing entries submitted via form are analyzed by Claude API through a Make webhook — flags common ICD-10 coding errors, mismatched CPT codes, and missing modifiers, then returns a structured error report.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">ICD-10</span><span class="pc-tag">CPT codes</span><span class="pc-tag">Claude API</span><span class="pc-tag">Make webhook</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="billing-checker.html">[open tool]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CLINICAL TOOLS -->
+      <div class="projects-section-label" style="color:var(--blue); margin-top:28px">🩺 clinical-tools/</div>
       <div class="projects-grid">
 
         <div class="project-card">
@@ -484,21 +641,6 @@
 
         <div class="project-card">
           <div class="pc-header">
-            <span class="pc-name">📋 SOAPIE Note Builder + AI</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Make / Gemini</span>
-          </div>
-          <p class="pc-desc">Structured SOAPIE note generator integrated with Gemini AI via a Make webhook — automatically generates and emails a complete clinical nursing note from input data. No manual formatting required.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">SOAPIE</span><span class="pc-tag">Gemini API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">automation</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="soapie-note.html">[open tool]</a>
-            <a class="pc-link" href="soapie-note.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
             <span class="pc-name">💧 Fluid Balance Tracker</span>
             <span class="pc-lang"><span class="lang-dot" style="background:var(--cyan)"></span>HTML/JS</span>
           </div>
@@ -526,8 +668,6 @@
             <a class="pc-link" href="abg-interpreter.html" target="_blank">[new tab]</a>
           </div>
         </div>
-
-
 
       </div>
     </div>
