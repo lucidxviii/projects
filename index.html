@@ -188,7 +188,6 @@
   .nf-colors { display: flex; gap: 4px; margin-top: 10px; }
   .cc { width: 18px; height: 18px; border-radius: 3px; }
 
-  /* Section sub-header for project categories */
   .projects-section-label {
     display: flex;
     align-items: center;
@@ -230,7 +229,6 @@
   .pc-link { font-size: 11px; color: var(--purple); text-decoration: none; border-bottom: 1px solid rgba(187,154,247,0.3); transition: color 0.15s; }
   .pc-link:hover { color: var(--pink); }
 
-  /* Live badge */
   .pc-live {
     display: inline-flex;
     align-items: center;
@@ -479,8 +477,44 @@
     </div>
     <div class="output">
 
+      <!-- FORMS -->
+      <div class="projects-section-label" style="color:var(--purple)">📋 patient-forms/</div>
+      <div class="projects-grid">
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">🏥 Patient Intake Form</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
+          </div>
+          <p class="pc-desc">Full patient registration form — collects demographics, chief complaint, visit type, urgency level, allergies, medications, past medical history, and emergency contact. Triggers Zapier → Google Sheets + confirmation email.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">Google Sheets</span><span class="pc-tag">Gmail</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="patient-intake.html">[open form]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+        <div class="project-card automation">
+          <div class="pc-header">
+            <span class="pc-name">📅 Appointment Request</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
+          </div>
+          <p class="pc-desc">Appointment request form with date/time slot picker, provider preference, visit type, and urgency. Triggers Zapier → queued in Google Sheets tracking sheet + auto-reply email with scheduling instructions.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">auto-reply</span><span class="pc-tag">Google Sheets</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div class="pc-links"><a class="pc-link" href="appointment-request.html">[open form]</a></div>
+            <span class="pc-live">live</span>
+          </div>
+        </div>
+
+      </div>
+
       <!-- AUTOMATIONS -->
-      <div class="projects-section-label" style="color:var(--orange)">🔄 automations/</div>
+      <div class="projects-section-label" style="color:var(--orange); margin-top:28px">🔄 automations/</div>
       <div class="projects-grid">
 
         <div class="project-card automation">
@@ -500,45 +534,15 @@
 
         <div class="project-card automation">
           <div class="pc-header">
-            <span class="pc-name">🏥 Patient Intake Confirmation</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
-          </div>
-          <p class="pc-desc">Patient intake form submitted via portfolio contact webhook triggers a Zapier flow — parses patient data, sends a formatted confirmation email, and logs the entry to a Google Sheet.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">Gmail</span><span class="pc-tag">Google Sheets</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="#contact">[trigger via form]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
-            <span class="pc-name">📅 Appointment Request Flow</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
-          </div>
-          <p class="pc-desc">Appointment requests submitted through the portfolio contact form are caught by a Zapier webhook, auto-replied with scheduling instructions, and queued in a tracking sheet for follow-up.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">auto-reply</span><span class="pc-tag">scheduling</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="#contact">[trigger via form]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
             <span class="pc-name">🚨 AI Symptom Triage System</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>n8n / Claude</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier / Claude</span>
           </div>
-          <p class="pc-desc">Symptom input triggers an n8n workflow that scores urgency using AI, branches into low/moderate/high-priority response paths, and sends a tailored triage email with recommended next steps.</p>
+          <p class="pc-desc">Symptom input triggers a Zapier workflow that scores urgency using AI, branches into low/moderate/high-priority response paths, and sends a tailored triage email with recommended next steps.</p>
           <div class="pc-tags">
-            <span class="pc-tag">n8n</span><span class="pc-tag">AI triage</span><span class="pc-tag">urgency scoring</span><span class="pc-tag">branching logic</span>
+            <span class="pc-tag">Zapier</span><span class="pc-tag">AI triage</span><span class="pc-tag">urgency scoring</span><span class="pc-tag">branching logic</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="#" target="_blank">[view workflow]</a></div>
+            <div class="pc-links"><a class="pc-link" href="symptom-triage.html">[open tool]</a></div>
             <span class="pc-live">live</span>
           </div>
         </div>
@@ -546,11 +550,11 @@
         <div class="project-card automation">
           <div class="pc-header">
             <span class="pc-name">📄 Discharge Summary Generator</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--blue)"></span>Make / Claude API</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier / Claude API</span>
           </div>
-          <p class="pc-desc">Patient data submitted via form triggers a Make webhook that calls the Claude API to generate a structured discharge summary — including diagnosis, medications, follow-up instructions, and precautions — then emails it automatically.</p>
+          <p class="pc-desc">Patient data submitted via form triggers a Zapier webhook that calls the Claude API to generate a structured discharge summary — including diagnosis, medications, follow-up instructions, and precautions — then emails it automatically.</p>
           <div class="pc-tags">
-            <span class="pc-tag">Claude API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">discharge notes</span><span class="pc-tag">Gmail</span>
+            <span class="pc-tag">Claude API</span><span class="pc-tag">Zapier webhook</span><span class="pc-tag">discharge notes</span><span class="pc-tag">Gmail</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
             <div class="pc-links"><a class="pc-link" href="discharge-summary.html">[open tool]</a></div>
@@ -560,27 +564,12 @@
 
         <div class="project-card automation">
           <div class="pc-header">
-            <span class="pc-name">⏰ Appointment Reminder SMS</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Make / Twilio</span>
-          </div>
-          <p class="pc-desc">Scheduled appointments logged in a Google Sheet trigger a Make automation that sends a personalized SMS reminder via Twilio 24 hours before the appointment time — reducing no-shows without manual follow-up.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Make</span><span class="pc-tag">Twilio SMS</span><span class="pc-tag">Google Sheets</span><span class="pc-tag">scheduling</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="#" target="_blank">[view workflow]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
             <span class="pc-name">🔍 Medical Billing Error Checker</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--teal)"></span>Make / Claude API</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier / Claude API</span>
           </div>
-          <p class="pc-desc">Billing entries submitted via form are analyzed by Claude API through a Make webhook — flags common ICD-10 coding errors, mismatched CPT codes, and missing modifiers, then returns a structured error report.</p>
+          <p class="pc-desc">Billing entries submitted via form are analyzed by Claude API through a Zapier webhook — flags common ICD-10 coding errors, mismatched CPT codes, and missing modifiers, then returns a structured error report.</p>
           <div class="pc-tags">
-            <span class="pc-tag">ICD-10</span><span class="pc-tag">CPT codes</span><span class="pc-tag">Claude API</span><span class="pc-tag">Make webhook</span>
+            <span class="pc-tag">ICD-10</span><span class="pc-tag">CPT codes</span><span class="pc-tag">Claude API</span><span class="pc-tag">Zapier webhook</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
             <div class="pc-links"><a class="pc-link" href="billing-checker.html">[open tool]</a></div>
