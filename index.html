@@ -513,11 +513,26 @@
 
       </div>
 
-      <!-- AUTOMATIONS -->
-      <div class="projects-section-label" style="color:var(--orange); margin-top:28px">🔄 automations/</div>
+      <!-- CLINICAL TOOLS -->
+      <div class="projects-section-label" style="color:var(--blue); margin-top:28px">🩺 clinical-tools/</div>
       <div class="projects-grid">
 
-        <div class="project-card automation">
+        <div class="project-card">
+          <div class="pc-header">
+            <span class="pc-name">🧠 ABG + Electrolyte Interpreter</span>
+            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
+          </div>
+          <p class="pc-desc">Clinical decision support for acid-base analysis. Input pH, PaCO₂, HCO₃, and electrolytes — get classification, compensation type, anion gap, and per-electrolyte imbalance hints with causes.</p>
+          <div class="pc-tags">
+            <span class="pc-tag">ABG</span><span class="pc-tag">acid-base</span><span class="pc-tag">electrolytes</span><span class="pc-tag">anion gap</span>
+          </div>
+          <div class="pc-links">
+            <a class="pc-link" href="abg-interpreter.html">[open tool]</a>
+            <a class="pc-link" href="abg-interpreter.html" target="_blank">[new tab]</a>
+          </div>
+        </div>
+
+        <div class="project-card">
           <div class="pc-header">
             <span class="pc-name">📋 SOAPIE Note Builder + AI</span>
             <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Make / Gemini</span>
@@ -531,57 +546,6 @@
             <span class="pc-live">live</span>
           </div>
         </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
-            <span class="pc-name">🚨 AI Symptom Triage System</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier / Claude</span>
-          </div>
-          <p class="pc-desc">Symptom input triggers a Zapier workflow that scores urgency using AI, branches into low/moderate/high-priority response paths, and sends a tailored triage email with recommended next steps.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Zapier</span><span class="pc-tag">AI triage</span><span class="pc-tag">urgency scoring</span><span class="pc-tag">branching logic</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="symptom-triage.html">[open tool]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
-            <span class="pc-name">📄 Discharge Summary Generator</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier / Claude API</span>
-          </div>
-          <p class="pc-desc">Patient data submitted via form triggers a Zapier webhook that calls the Claude API to generate a structured discharge summary — including diagnosis, medications, follow-up instructions, and precautions — then emails it automatically.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Claude API</span><span class="pc-tag">Zapier webhook</span><span class="pc-tag">discharge notes</span><span class="pc-tag">Gmail</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="discharge-summary.html">[open tool]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
-            <span class="pc-name">🔍 Medical Billing Error Checker</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier / Claude API</span>
-          </div>
-          <p class="pc-desc">Billing entries submitted via form are analyzed by Claude API through a Zapier webhook — flags common ICD-10 coding errors, mismatched CPT codes, and missing modifiers, then returns a structured error report.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">ICD-10</span><span class="pc-tag">CPT codes</span><span class="pc-tag">Claude API</span><span class="pc-tag">Zapier webhook</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="billing-checker.html">[open tool]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- CLINICAL TOOLS -->
-      <div class="projects-section-label" style="color:var(--blue); margin-top:28px">🩺 clinical-tools/</div>
-      <div class="projects-grid">
 
         <div class="project-card">
           <div class="pc-header">
@@ -615,21 +579,6 @@
 
         <div class="project-card">
           <div class="pc-header">
-            <span class="pc-name">🔬 Lab Values Reference</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
-          </div>
-          <p class="pc-desc">Quick-reference normal ranges for CBC, BMP, LFTs, ABGs and more — with plain-English explanations for nursing students.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">CBC</span><span class="pc-tag">BMP</span><span class="pc-tag">ABG</span><span class="pc-tag">reference</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="lab-values.html">[open tool]</a>
-            <a class="pc-link" href="lab-values.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
             <span class="pc-name">💧 Fluid Balance Tracker</span>
             <span class="pc-lang"><span class="lang-dot" style="background:var(--cyan)"></span>HTML/JS</span>
           </div>
@@ -645,16 +594,16 @@
 
         <div class="project-card">
           <div class="pc-header">
-            <span class="pc-name">🧠 ABG + Electrolyte Interpreter</span>
+            <span class="pc-name">🔬 Lab Values Reference</span>
             <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
           </div>
-          <p class="pc-desc">Clinical decision support for acid-base analysis. Input pH, PaCO₂, HCO₃, and electrolytes — get classification, compensation type, anion gap, and per-electrolyte imbalance hints with causes.</p>
+          <p class="pc-desc">Quick-reference normal ranges for CBC, BMP, LFTs, ABGs and more — with plain-English explanations for nursing students.</p>
           <div class="pc-tags">
-            <span class="pc-tag">ABG</span><span class="pc-tag">acid-base</span><span class="pc-tag">electrolytes</span><span class="pc-tag">anion gap</span>
+            <span class="pc-tag">CBC</span><span class="pc-tag">BMP</span><span class="pc-tag">ABG</span><span class="pc-tag">reference</span>
           </div>
           <div class="pc-links">
-            <a class="pc-link" href="abg-interpreter.html">[open tool]</a>
-            <a class="pc-link" href="abg-interpreter.html" target="_blank">[new tab]</a>
+            <a class="pc-link" href="lab-values.html">[open tool]</a>
+            <a class="pc-link" href="lab-values.html" target="_blank">[new tab]</a>
           </div>
         </div>
 
