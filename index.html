@@ -123,13 +123,6 @@
   }
   .panel-header-title { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
   .panel-header-sub { font-size: 11.5px; color: var(--subtle); margin-top: 2px; font-weight: 500; }
-  .panel-dot {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--subtle); font-size: 11px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
   .panel-body { padding: 26px; }
 
   .group-label {
@@ -297,7 +290,6 @@
           <div class="panel-header-title"><span>🧑‍⚕️</span> Profile</div>
           <div class="panel-header-sub">Nursing student building healthcare automation on the side</div>
         </div>
-        <div class="panel-dot">✕</div>
       </div>
       <div class="panel-body">
         <div class="hero-name"><span class="hn-first">Luke Thomas</span>&nbsp;<span class="hn-last">Rivas</span></div>
@@ -326,10 +318,7 @@
             <div class="field-row"><span class="field-label">Location</span><span class="field-value mono">Bacolod City, Philippines</span></div>
             <div class="field-row">
               <span class="field-label">Status</span>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span class="field-value mono" style="color:var(--green)">open to opportunities</span>
-                <div class="toggle on"></div>
-              </div>
+              <span class="field-value mono" style="color:var(--green)">open to opportunities</span>
             </div>
           </div>
         </div>
@@ -357,7 +346,6 @@
           <div class="panel-header-title"><span>🗂️</span> Projects</div>
           <div class="panel-header-sub">Healthcare tools, automation workflows &amp; things I've shipped</div>
         </div>
-        <div class="panel-dot">✕</div>
       </div>
       <div class="panel-body">
 
@@ -372,7 +360,7 @@
               </div>
               <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
             </div>
-            <p class="pc-desc">Full patient registration form — collects demographics, chief complaint, visit type, urgency level, allergies, medications, past medical history, and emergency contact. Triggers Zapier → Google Sheets + confirmation email.</p>
+            <p class="pc-desc">Full patient registration form that collects demographics, chief complaint, visit type, urgency level, allergies, medications, past medical history, and emergency contact. Triggers Zapier to Google Sheets plus a confirmation email.</p>
             <div class="pc-tags">
               <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">Google Sheets</span><span class="pc-tag">Gmail</span>
             </div>
@@ -390,7 +378,7 @@
               </div>
               <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
             </div>
-            <p class="pc-desc">Appointment request form with date/time slot picker, provider preference, visit type, and urgency. Triggers Zapier → queued in Google Sheets tracking sheet + auto-reply email with scheduling instructions.</p>
+            <p class="pc-desc">Appointment request form with date/time slot picker, provider preference, visit type, and urgency. Triggers Zapier to queue into a Google Sheets tracking sheet plus an auto-reply email with scheduling instructions.</p>
             <div class="pc-tags">
               <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">auto-reply</span><span class="pc-tag">Google Sheets</span>
             </div>
@@ -413,7 +401,7 @@
               </div>
               <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Make / Gemini</span>
             </div>
-            <p class="pc-desc">Structured SOAPIE note generator integrated with Gemini AI via a Make webhook — automatically generates and emails a complete clinical nursing note from input data. No manual formatting required.</p>
+            <p class="pc-desc">Structured SOAPIE note generator integrated with Gemini AI via a Make webhook that automatically generates and emails a complete clinical nursing note from input data. No manual formatting required.</p>
             <div class="pc-tags">
               <span class="pc-tag">SOAPIE</span><span class="pc-tag">Gemini API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">Gmail</span>
             </div>
@@ -431,7 +419,7 @@
               </div>
               <span class="pc-lang"><span class="lang-dot" style="background:var(--yellow)"></span>HTML/JS</span>
             </div>
-            <p class="pc-desc">Four-in-one bedside dosage tool: basic dose, weight-based, IV concentration, and BSA (Mosteller) calculations — all with live formula breakdowns.</p>
+            <p class="pc-desc">Four-in-one bedside dosage tool: basic dose, weight-based, IV concentration, and BSA (Mosteller) calculations, all with live formula breakdowns.</p>
             <div class="pc-tags">
               <span class="pc-tag">vanilla JS</span><span class="pc-tag">clinical math</span><span class="pc-tag">BSA</span><span class="pc-tag">mg/kg</span>
             </div>
@@ -471,7 +459,7 @@
               </div>
               <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
             </div>
-            <p class="pc-desc">Quick-reference normal ranges for CBC, BMP, LFTs, ABGs and more — with plain-English explanations for nursing students.</p>
+            <p class="pc-desc">Quick-reference normal ranges for CBC, BMP, LFTs, ABGs and more, with plain-English explanations for nursing students.</p>
             <div class="pc-tags">
               <span class="pc-tag">CBC</span><span class="pc-tag">BMP</span><span class="pc-tag">ABG</span><span class="pc-tag">reference</span>
             </div>
