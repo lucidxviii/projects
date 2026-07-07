@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>~/portfolio — AI Automation & Healthcare VA</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>~/projects — AI Automation & Healthcare VA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:        #1a1b26;
@@ -30,835 +31,464 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    background: var(--bg);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(187,154,247,0.10), transparent 42%),
+      radial-gradient(circle at 88% 0%, rgba(122,162,247,0.08), transparent 40%),
+      var(--bg);
+    min-height: 100vh;
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
     font-size: 14px;
     line-height: 1.6;
     overflow-x: hidden;
   }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  .kitty-root { max-width: 1100px; margin: 30px auto; padding: 0 16px 60px; }
-
-  .kitty-window {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(122,162,247,0.08), 0 24px 80px rgba(0,0,0,0.6), 0 0 60px rgba(187,154,247,0.04);
-    margin-bottom: 20px;
-    animation: fadeSlide 0.5s ease both;
-  }
+  .app-shell { max-width: 1180px; margin: 36px auto; padding: 0 20px 60px; display: flex; align-items: flex-start; gap: 22px; }
 
   @keyframes fadeSlide {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .kitty-titlebar {
-    background: var(--bg3);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    user-select: none;
-  }
-
-  .kitty-dots { display: flex; gap: 7px; }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot-red    { background: var(--pink);   box-shadow: 0 0 6px var(--pink); }
-  .dot-yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
-  .dot-green  { background: var(--green);  box-shadow: 0 0 6px var(--green); }
-
-  .kitty-tabs { display: flex; gap: 2px; margin-left: 10px; flex: 1; }
-  .tab {
-    padding: 2px 14px;
-    border-radius: 4px 4px 0 0;
-    font-size: 12px;
-    cursor: pointer;
-    color: var(--subtle);
-    border: 1px solid transparent;
-    border-bottom: none;
-    transition: all 0.15s;
-  }
-  .tab.active { background: var(--bg2); color: var(--blue); border-color: var(--border); }
-  .tab:hover:not(.active) { color: var(--text); }
-  .tab-icon { margin-right: 5px; }
-
-  .kitty-body { padding: 20px 24px; min-height: 80px; }
-
-  .prompt {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0;
-    margin-bottom: 4px;
-    font-size: 13px;
-  }
-  .p-user  { color: var(--green);  font-weight: 600; }
-  .p-at    { color: var(--subtle); }
-  .p-host  { color: var(--blue);   font-weight: 600; }
-  .p-sep   { color: var(--subtle); margin: 0 2px; }
-  .p-path  { color: var(--yellow); }
-  .p-branch{ color: var(--teal); }
-  .p-arrow { color: var(--pink);   margin-left: 6px; font-weight: 700; }
-  .p-cmd   { color: var(--text);   margin-left: 6px; }
-  .p-arg   { color: var(--cyan);   margin-left: 6px; }
-  .p-flag  { color: var(--orange); margin-left: 6px; }
-
-  .output { padding: 6px 0 14px 0; }
-
-  .nav-window {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-    animation: fadeSlide 0.4s ease both;
+  /* ---------- SIDEBAR ---------- */
+  .sidebar {
+    width: 236px;
+    flex-shrink: 0;
     position: sticky;
-    top: 10px;
-    z-index: 100;
-    backdrop-filter: blur(12px);
+    top: 20px;
+    background: rgba(36,40,59,0.55);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 18px 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    animation: fadeSlide 0.4s ease both;
   }
-  .nav-logo { font-size: 13px; color: var(--purple); font-weight: 700; }
-  .nav-logo span { color: var(--pink); }
-  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
-  .nav-link {
-    padding: 4px 10px;
-    border-radius: 4px;
+  .sb-brand { display: flex; align-items: center; gap: 10px; padding: 6px 10px 14px; }
+  .sb-brand-icon {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .sb-brand-text { font-weight: 700; font-size: 13px; color: var(--text); }
+  .sb-brand-text span { display:block; font-size: 10px; color: var(--subtle); font-weight: 500; }
+
+  .sb-divider { height: 1px; background: var(--border); margin: 8px 6px 12px; }
+  .sb-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--subtle); padding: 4px 12px 8px; }
+
+  .nav-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 999px;
     color: var(--subtle);
     text-decoration: none;
-    font-size: 12px;
+    font-size: 12.5px;
+    font-weight: 600;
     transition: all 0.15s;
-    border: 1px solid transparent;
   }
-  .nav-link:hover { color: var(--text); background: var(--panel); border-color: var(--border); }
-  .nav-link .nl-prefix { color: var(--pink); }
-  .nav-link .nl-num    { color: var(--orange); }
+  .nav-item .ni-icon { font-size: 14px; width: 18px; text-align: center; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--purple); color: var(--bg2); }
+  .nav-item.sub { font-size: 12px; padding: 7px 12px 7px 20px; font-weight: 500; }
 
-  section { margin-bottom: 20px; }
-  .sec-comment { color: var(--subtle); font-size: 12px; margin-bottom: 8px; font-style: italic; }
-  .sec-comment::before { content: '# '; color: var(--green); }
-
-  .hero-grid { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
-  .hero-name { font-size: clamp(22px, 4vw, 36px); font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
-  .hn-first { color: var(--blue); }
-  .hn-last  { color: var(--purple); }
-  .hero-role { color: var(--teal); font-size: 13px; margin-bottom: 14px; }
-  .hero-role::before { content: '> '; color: var(--pink); }
-  .hero-bio { color: var(--white); font-size: 13px; max-width: 580px; line-height: 1.8; margin-bottom: 16px; }
-
-  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .badge { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid; }
-  .badge-pink   { color: var(--pink);   border-color: var(--pink);   background: rgba(247,118,142,0.08); }
-  .badge-cyan   { color: var(--cyan);   border-color: var(--cyan);   background: rgba(125,207,255,0.08); }
-  .badge-green  { color: var(--green);  border-color: var(--green);  background: rgba(158,206,106,0.08); }
-  .badge-purple { color: var(--purple); border-color: var(--purple); background: rgba(187,154,247,0.08); }
-  .badge-orange { color: var(--orange); border-color: var(--orange); background: rgba(255,158,100,0.08); }
-  .badge-teal   { color: var(--teal);   border-color: var(--teal);   background: rgba(115,218,202,0.08); }
-
-  .kitty-ascii { font-size: 10px; line-height: 1.3; color: var(--purple); text-align: right; opacity: 0.85; }
-  .kitty-ascii .ka-pink   { color: var(--pink); }
-  .kitty-ascii .ka-yellow { color: var(--yellow); }
-  .kitty-ascii .ka-cyan   { color: var(--cyan); }
-  .kitty-ascii .ka-green  { color: var(--green); }
-
-  .neofetch { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; }
-  .nf-cat { font-size: 9px; line-height: 1.25; color: var(--purple); font-family: 'Fira Code', monospace; }
-  .nf-info { font-size: 12px; }
-  .nf-row { display: flex; gap: 0; margin-bottom: 3px; }
-  .nf-key { color: var(--blue); font-weight: 600; min-width: 120px; }
-  .nf-sep { color: var(--subtle); margin: 0 4px; }
-  .nf-val { color: var(--text); }
-  .nf-colors { display: flex; gap: 4px; margin-top: 10px; }
-  .cc { width: 18px; height: 18px; border-radius: 3px; }
-
-  .projects-section-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 18px 0 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  .sb-status {
+    margin-top: 14px; padding: 12px; border-radius: 14px;
+    background: var(--bg3); border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
   }
-  .projects-section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .sb-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; flex-shrink:0; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .sb-status-text { font-size: 11px; color: var(--white); }
 
-  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-  .project-card {
-    background: var(--panel);
+  /* ---------- CONTENT / PANELS ---------- */
+  .content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+  .panel {
+    background: rgba(36,40,59,0.55);
+    backdrop-filter: blur(20px);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-    cursor: default;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    animation: fadeSlide 0.5s ease both;
   }
-  .project-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(122,162,247,0.12); }
-  .project-card.automation:hover { border-color: var(--orange); box-shadow: 0 8px 30px rgba(255,158,100,0.12); }
-  .pc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .pc-name { font-weight: 600; color: var(--blue); font-size: 13px; }
-  .project-card.automation .pc-name { color: var(--orange); }
-  .pc-lang { font-size: 11px; display: flex; align-items: center; gap: 5px; color: var(--subtle); }
-  .lang-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .pc-desc { color: var(--white); font-size: 12px; line-height: 1.7; margin-bottom: 10px; }
-  .pc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-  .pc-tag { font-size: 10px; color: var(--teal); background: rgba(115,218,202,0.08); border: 1px solid rgba(115,218,202,0.2); border-radius: 3px; padding: 1px 7px; }
-  .project-card.automation .pc-tag { color: var(--orange); background: rgba(255,158,100,0.08); border-color: rgba(255,158,100,0.2); }
-  .pc-links { margin-top: 12px; display: flex; gap: 10px; }
-  .pc-link { font-size: 11px; color: var(--purple); text-decoration: none; border-bottom: 1px solid rgba(187,154,247,0.3); transition: color 0.15s; }
-  .pc-link:hover { color: var(--pink); }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(31,35,53,0.5);
+  }
+  .panel-header-title { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .panel-header-sub { font-size: 11.5px; color: var(--subtle); margin-top: 2px; font-weight: 500; }
+  .panel-dot {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--subtle); font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .panel-body { padding: 26px; }
+
+  .group-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.09em; color: var(--subtle); margin: 4px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .group-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* preview row (about) */
+  .preview-row { display: grid; grid-template-columns: 220px 1fr; gap: 18px; margin-bottom: 22px; }
+  .preview-thumb {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(160deg, #2b2f4a 0%, #3a2f52 55%, #24283b 100%);
+    border: 1px solid var(--border);
+    min-height: 190px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .preview-thumb .cat-art { font-size: 10px; line-height: 1.25; color: var(--purple); text-align: center; }
+  .preview-thumb-tag {
+    position: absolute; left: 10px; bottom: 10px;
+    font-size: 10.5px; font-weight: 600; color: var(--text);
+    background: rgba(22,22,30,0.65); backdrop-filter: blur(6px);
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  .field-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .field-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 16px; border-bottom: 1px solid var(--border);
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { color: var(--subtle); font-size: 11.5px; font-weight: 600; }
+  .field-value { font-size: 12px; font-weight: 600; color: var(--text); }
+
+  .toggle {
+    width: 38px; height: 21px; border-radius: 999px; background: var(--border);
+    position: relative; flex-shrink: 0;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 17px; height: 17px; border-radius: 50%; background: var(--white);
+    transition: left 0.2s;
+  }
+  .toggle.on { background: var(--purple); }
+  .toggle.on::after { left: 19px; background: var(--bg2); }
+
+  .hero-name { font-size: clamp(22px, 4vw, 32px); font-weight: 800; line-height: 1.2; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .hn-first { color: var(--text); }
+  .hn-last  { color: var(--purple); }
+  .hero-role { color: var(--teal); font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+  .hero-bio { color: var(--white); font-size: 13.5px; max-width: 640px; line-height: 1.8; margin-bottom: 22px; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill-btn {
+    padding: 7px 15px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--white);
+  }
+  .pill-btn.active { background: var(--purple); color: var(--bg2); border-color: var(--purple); }
+
+  /* projects */
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .projects-grid:last-child { margin-bottom: 0; }
+  .project-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .project-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(122,162,247,0.14); }
+  .project-card.automation:hover { border-color: var(--orange); box-shadow: 0 10px 30px rgba(255,158,100,0.14); }
+
+  .pc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+  .pc-name-row { display: flex; align-items: center; gap: 10px; }
+  .pc-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    background: rgba(122,162,247,0.12);
+  }
+  .project-card.automation .pc-icon { background: rgba(255,158,100,0.14); }
+  .pc-name { font-weight: 700; color: var(--text); font-size: 13px; }
+  .pc-lang { font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px; color: var(--subtle); }
+  .lang-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .pc-desc { color: var(--white); font-size: 12px; line-height: 1.7; margin-bottom: 12px; }
+  .pc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .pc-tag {
+    font-size: 10px; font-weight: 600; color: var(--teal);
+    background: rgba(115,218,202,0.1); border: 1px solid rgba(115,218,202,0.22);
+    border-radius: 999px; padding: 3px 10px;
+  }
+  .project-card.automation .pc-tag { color: var(--orange); background: rgba(255,158,100,0.1); border-color: rgba(255,158,100,0.22); }
+
+  .pc-footer { display: flex; align-items: center; justify-content: space-between; }
+  .pc-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pc-link {
+    font-size: 11px; font-weight: 600; color: var(--purple); text-decoration: none;
+    border: 1px solid var(--border); background: var(--panel);
+    padding: 5px 12px; border-radius: 999px; transition: all 0.15s;
+  }
+  .pc-link:hover { color: var(--bg2); background: var(--purple); border-color: var(--purple); }
 
   .pc-live {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    color: var(--green);
-    background: rgba(158,206,106,0.1);
-    border: 1px solid rgba(158,206,106,0.25);
-    border-radius: 3px;
-    padding: 1px 7px;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; color: var(--green);
+    background: rgba(158,206,106,0.1); border: 1px solid rgba(158,206,106,0.25);
+    border-radius: 999px; padding: 4px 10px;
   }
-  .pc-live::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse 2s ease infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .pc-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
 
-  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-  .skill-group { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-  .sg-title { font-size: 11px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .skill-bar-row { margin-bottom: 7px; }
-  .sbr-top { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; }
-  .sbr-name { color: var(--white); }
-  .sbr-pct  { color: var(--subtle); }
-  .skill-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .skill-fill { height: 100%; border-radius: 2px; animation: growBar 1.2s cubic-bezier(0.4,0,0.2,1) both; }
-  @keyframes growBar { from { width: 0 !important; } }
-
-  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .contact-form { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
-  .cf-title { color: var(--green); font-size: 12px; margin-bottom: 14px; }
-  .cf-title::before { content: '$ '; color: var(--pink); }
-  .cf-field { margin-bottom: 12px; }
-  .cf-label { display: block; color: var(--subtle); font-size: 11px; margin-bottom: 5px; }
-  .cf-label::before { content: '--'; color: var(--orange); margin-right: 4px; }
-  .cf-input, .cf-textarea {
-    width: 100%;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 8px 10px;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    outline: none;
-    transition: border-color 0.15s;
-    resize: none;
-  }
-  .cf-input:focus, .cf-textarea:focus { border-color: var(--blue); }
-  .cf-btn {
-    background: linear-gradient(135deg, var(--blue), var(--purple));
-    border: none;
-    border-radius: 5px;
-    color: var(--bg);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 9px 20px;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-  }
-  .cf-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-  .contact-links { display: flex; flex-direction: column; gap: 10px; }
-  .cl-item {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    color: var(--text);
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .cl-item:hover { border-color: var(--teal); transform: translateX(4px); }
-  .cl-icon  { font-size: 18px; width: 28px; text-align: center; }
-  .cl-label { font-size: 11px; color: var(--subtle); }
-  .cl-value { font-size: 13px; color: var(--teal); }
-
-  .palette { display: flex; gap: 3px; margin: 10px 0 4px; }
-  .pal { height: 6px; flex: 1; border-radius: 2px; }
-
-  @media (max-width: 640px) {
-    .hero-grid    { grid-template-columns: 1fr; }
-    .kitty-ascii  { display: none; }
-    .contact-grid { grid-template-columns: 1fr; }
-    .neofetch     { grid-template-columns: 1fr; }
-    .nf-cat       { display: none; }
+  @media (max-width: 900px) {
+    .app-shell { flex-direction: column; }
+    .sidebar {
+      position: sticky; top: 10px; width: 100%;
+      display: flex; align-items: center; gap: 6px;
+      overflow-x: auto; padding: 10px 12px; border-radius: 18px;
+    }
+    .sb-brand { padding: 0 8px 0 0; flex-shrink: 0; }
+    .sb-divider, .sb-group-label, .sb-status { display: none; }
+    .nav-list { flex-direction: row; }
+    .nav-item { white-space: nowrap; }
+    .nav-item.sub { padding: 9px 12px; }
+    .preview-row { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<div class="kitty-root">
+<div class="app-shell">
 
-<!-- NAV -->
-<nav class="nav-window">
-  <div class="nav-logo"><span>~</span>/portfolio</div>
-  <div class="nav-links">
-    <a class="nav-link" href="#about"><span class="nl-prefix">:</span><span class="nl-num">1</span> about</a>
-    <a class="nav-link" href="#projects"><span class="nl-prefix">:</span><span class="nl-num">2</span> projects</a>
-    <a class="nav-link" href="#skills"><span class="nl-prefix">:</span><span class="nl-num">3</span> skills</a>
-    <a class="nav-link" href="#contact"><span class="nl-prefix">:</span><span class="nl-num">4</span> contact</a>
-  </div>
-</nav>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">🗂️</div>
+      <div class="sb-brand-text">~/projects<span>Luke Thomas Rivas</span></div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="nav-list">
+      <a class="nav-item active" href="#about"><span class="ni-icon">🧑‍⚕️</span> About</a>
+      <a class="nav-item" href="#projects"><span class="ni-icon">🗂️</span> Projects</a>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-group-label">Categories</div>
+    <div class="nav-list">
+      <a class="nav-item sub" href="#patient-forms"><span class="ni-icon">📋</span> Patient Forms</a>
+      <a class="nav-item sub" href="#clinical-tools"><span class="ni-icon">🩺</span> Clinical Tools</a>
+    </div>
+    <div class="sb-status">
+      <div class="sb-status-dot"></div>
+      <div class="sb-status-text">Open to opportunities</div>
+    </div>
+  </aside>
 
-<!-- ABOUT -->
-<section id="about">
-<div class="kitty-window" style="animation-delay:0.05s">
-  <div class="kitty-titlebar">
-    <div class="kitty-dots">
-      <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
-    </div>
-    <div class="kitty-tabs">
-      <div class="tab active"><span class="tab-icon">🐱</span>about.sh</div>
-      <div class="tab">zsh</div>
-    </div>
-  </div>
-  <div class="kitty-body">
-    <div class="prompt">
-      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
-      <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
-      <span class="p-git"> </span><span class="p-branch"> main</span>
-      <span class="p-arrow">❯</span>
-      <span class="p-cmd">cat</span><span class="p-arg">about.sh</span>
-    </div>
-    <div class="output">
-      <div class="hero-grid">
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ABOUT PANEL -->
+    <section id="about">
+    <div class="panel" style="animation-delay:0.05s">
+      <div class="panel-header">
         <div>
-          <div class="hero-name">
-            <span class="hn-first">Luke Thomas</span>&nbsp;<span class="hn-last">Rivas</span>
-          </div>
-          <div class="hero-role">Student Nurse & Automation Specialist</div>
-          <p class="hero-bio">
-            Nursing student with a side quest in AI automation. I build healthcare workflows and clinical tools because I'd rather stand out than blend in. Make, Zapier, n8n, and a lot of late nights.
-          </p>
-          <div class="badge-row">
-            <span class="badge badge-pink">💉 Nursing Student</span>
-            <span class="badge badge-cyan">🤖 AI & Automation</span>
-            <span class="badge badge-green">🔄 Workflow Builder</span>
-            <span class="badge badge-purple">🧠 Prompt Engineer</span>
-            <span class="badge badge-orange">🏥 Healthcare Tech</span>
-            <span class="badge badge-teal">🌙 Night Owl</span>
-            <span class="badge badge-pink">🧩 I understand it now</span>
-            <span class="badge badge-cyan">💻 I use Arch BTW</span>
-          </div>
+          <div class="panel-header-title"><span>🧑‍⚕️</span> Profile</div>
+          <div class="panel-header-sub">Nursing student building healthcare automation on the side</div>
         </div>
-        <div class="kitty-ascii">
-<pre>
-<span class="ka-pink">  /\_____/\</span>
-<span class="ka-pink"> /  o   o  \</span>
-<span class="ka-pink">( ==  ^  == )</span>
-<span class="ka-cyan"> )         (</span>
-<span class="ka-cyan">(           )</span>
-<span class="ka-green">( (  )   (  ) )</span>
-<span class="ka-yellow">(__(__)___(__)__)</span>
-<span class="ka-pink">  healthcare.cat</span>
-</pre>
-        </div>
+        <div class="panel-dot">✕</div>
       </div>
+      <div class="panel-body">
+        <div class="hero-name"><span class="hn-first">Luke Thomas</span>&nbsp;<span class="hn-last">Rivas</span></div>
+        <div class="hero-role">Student Nurse &amp; Automation Specialist</div>
+        <p class="hero-bio">Nursing student with a side quest in AI automation. I build healthcare workflows and clinical tools because I'd rather stand out than blend in. Make, Zapier, n8n, and a lot of late nights.</p>
 
-      <div class="palette" style="margin-top:20px">
-        <div class="pal" style="background:var(--pink)"></div>
-        <div class="pal" style="background:var(--orange)"></div>
-        <div class="pal" style="background:var(--yellow)"></div>
-        <div class="pal" style="background:var(--green)"></div>
-        <div class="pal" style="background:var(--teal)"></div>
-        <div class="pal" style="background:var(--cyan)"></div>
-        <div class="pal" style="background:var(--blue)"></div>
-        <div class="pal" style="background:var(--purple)"></div>
-        <div class="pal" style="background:var(--magenta)"></div>
-      </div>
-
-      <div class="prompt" style="margin-top:14px">
-        <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
-        <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
-        <span class="p-arrow">❯</span>
-        <span class="p-cmd">neofetch</span>
-      </div>
-      <div class="output">
-        <div class="neofetch">
-          <div class="nf-cat">
-<pre><span style="color:var(--pink)">  /\_____/\</span>
-<span style="color:var(--pink)"> /  </span><span style="color:var(--yellow)">o</span><span style="color:var(--pink)">   </span><span style="color:var(--yellow)">o</span><span style="color:var(--pink)">  \</span>
-<span style="color:var(--pink)">( ==  </span><span style="color:var(--cyan)">^</span><span style="color:var(--pink)">  == )</span>
-<span style="color:var(--cyan)"> )         (</span>
-<span style="color:var(--cyan)">(           )</span>
-<span style="color:var(--green)">( (  )   (  ) )</span>
-<span style="color:var(--teal)">(__(__)_(__)__)</span></pre>
+        <div class="group-label">Snapshot</div>
+        <div class="preview-row">
+          <div class="preview-thumb">
+            <div class="cat-art mono">
+<pre>  /\_____/\
+ /  o   o  \
+( ==  ^  == )
+ )         (
+(           )
+( (  )   (  ) )
+(__(__)_(__)__)</pre>
+            </div>
+            <div class="preview-thumb-tag">healthcare.cat</div>
           </div>
-          <div class="nf-info">
-            <div class="nf-row"><span class="nf-key" style="color:var(--pink)">nurse</span><span class="nf-sep">@</span><span class="nf-val" style="color:var(--blue)">arch-health</span></div>
-            <div class="nf-row"><span class="nf-key">OS</span><span class="nf-sep">:</span><span class="nf-val">Arch Linux (Healthcare Edition)</span></div>
-            <div class="nf-row"><span class="nf-key">Shell</span><span class="nf-sep">:</span><span class="nf-val">zsh 5.9 + oh-my-zsh</span></div>
-            <div class="nf-row"><span class="nf-key">Terminal</span><span class="nf-sep">:</span><span class="nf-val">kitty 0.31.0</span></div>
-            <div class="nf-row"><span class="nf-key">Theme</span><span class="nf-sep">:</span><span class="nf-val">TokyoNight Storm</span></div>
-            <div class="nf-row"><span class="nf-key">Editor</span><span class="nf-sep">:</span><span class="nf-val">Neovim + LazyVim</span></div>
-            <div class="nf-row"><span class="nf-key">WM</span><span class="nf-sep">:</span><span class="nf-val">Hyprland</span></div>
-            <div class="nf-row"><span class="nf-key">Specialty</span><span class="nf-sep">:</span><span class="nf-val" style="color:var(--teal)">AI Automation & Healthcare Tech</span></div>
-            <div class="nf-row"><span class="nf-key">Location</span><span class="nf-sep">:</span><span class="nf-val">Bacolod City, Philippines</span></div>
-            <div class="nf-row"><span class="nf-key">Status</span><span class="nf-sep">:</span><span class="nf-val" style="color:var(--green)">open to opportunities</span></div>
-            <div class="nf-colors">
-              <div class="cc" style="background:var(--bg3)"></div>
-              <div class="cc" style="background:var(--pink)"></div>
-              <div class="cc" style="background:var(--orange)"></div>
-              <div class="cc" style="background:var(--yellow)"></div>
-              <div class="cc" style="background:var(--green)"></div>
-              <div class="cc" style="background:var(--teal)"></div>
-              <div class="cc" style="background:var(--blue)"></div>
-              <div class="cc" style="background:var(--purple)"></div>
+          <div class="field-card">
+            <div class="field-row"><span class="field-label">OS</span><span class="field-value mono">Arch Linux (Healthcare Edition)</span></div>
+            <div class="field-row"><span class="field-label">WM</span><span class="field-value mono">Hyprland (end-4 dots)</span></div>
+            <div class="field-row"><span class="field-label">Editor</span><span class="field-value mono">Neovim + LazyVim</span></div>
+            <div class="field-row"><span class="field-label">Specialty</span><span class="field-value mono" style="color:var(--teal)">AI Automation &amp; Healthcare Tech</span></div>
+            <div class="field-row"><span class="field-label">Location</span><span class="field-value mono">Bacolod City, Philippines</span></div>
+            <div class="field-row">
+              <span class="field-label">Status</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="field-value mono" style="color:var(--green)">open to opportunities</span>
+                <div class="toggle on"></div>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="group-label">Currently</div>
+        <div class="pill-row">
+          <span class="pill-btn active">💉 Nursing Student</span>
+          <span class="pill-btn">🤖 AI &amp; Automation</span>
+          <span class="pill-btn">🔄 Workflow Builder</span>
+          <span class="pill-btn">🧠 Prompt Engineer</span>
+          <span class="pill-btn">🏥 Healthcare Tech</span>
+          <span class="pill-btn">🌙 Night Owl</span>
+          <span class="pill-btn">🧩 I understand it now</span>
+          <span class="pill-btn">💻 I use Arch BTW</span>
+        </div>
       </div>
     </div>
+    </section>
+
+    <!-- PROJECTS PANEL -->
+    <section id="projects">
+    <div class="panel" style="animation-delay:0.15s">
+      <div class="panel-header">
+        <div>
+          <div class="panel-header-title"><span>🗂️</span> Projects</div>
+          <div class="panel-header-sub">Healthcare tools, automation workflows &amp; things I've shipped</div>
+        </div>
+        <div class="panel-dot">✕</div>
+      </div>
+      <div class="panel-body">
+
+        <div class="group-label" id="patient-forms">📋 Patient Forms</div>
+        <div class="projects-grid">
+
+          <div class="project-card automation">
+            <div class="pc-header">
+              <div class="pc-name-row">
+                <div class="pc-icon">🏥</div>
+                <span class="pc-name">Patient Intake Form</span>
+              </div>
+              <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
+            </div>
+            <p class="pc-desc">Full patient registration form — collects demographics, chief complaint, visit type, urgency level, allergies, medications, past medical history, and emergency contact. Triggers Zapier → Google Sheets + confirmation email.</p>
+            <div class="pc-tags">
+              <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">Google Sheets</span><span class="pc-tag">Gmail</span>
+            </div>
+            <div class="pc-footer">
+              <div class="pc-links"><a class="pc-link" href="https://docs.google.com/forms/d/e/1FAIpQLSdwxNJ8i7vTzPyjnT3z1FBvdEPMJ7RIrBU4Z9fslfwDrRkaVw/viewform?usp=header" target="_blank">Open form</a></div>
+              <span class="pc-live">live</span>
+            </div>
+          </div>
+
+          <div class="project-card automation">
+            <div class="pc-header">
+              <div class="pc-name-row">
+                <div class="pc-icon">📅</div>
+                <span class="pc-name">Appointment Request</span>
+              </div>
+              <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
+            </div>
+            <p class="pc-desc">Appointment request form with date/time slot picker, provider preference, visit type, and urgency. Triggers Zapier → queued in Google Sheets tracking sheet + auto-reply email with scheduling instructions.</p>
+            <div class="pc-tags">
+              <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">auto-reply</span><span class="pc-tag">Google Sheets</span>
+            </div>
+            <div class="pc-footer">
+              <div class="pc-links"><a class="pc-link" href="https://docs.google.com/forms/d/e/1FAIpQLSe3lmNVFSZdaQIMQIOrphfSlhb19PjR6HNWNFlCOYNs5iFYBA/viewform?usp=header" target="_blank">Open form</a></div>
+              <span class="pc-live">live</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="group-label" id="clinical-tools">🩺 Clinical Tools</div>
+        <div class="projects-grid">
+
+          <div class="project-card">
+            <div class="pc-header">
+              <div class="pc-name-row">
+                <div class="pc-icon">📋</div>
+                <span class="pc-name">SOAPIE Note Builder + AI</span>
+              </div>
+              <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Make / Gemini</span>
+            </div>
+            <p class="pc-desc">Structured SOAPIE note generator integrated with Gemini AI via a Make webhook — automatically generates and emails a complete clinical nursing note from input data. No manual formatting required.</p>
+            <div class="pc-tags">
+              <span class="pc-tag">SOAPIE</span><span class="pc-tag">Gemini API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">Gmail</span>
+            </div>
+            <div class="pc-footer">
+              <div class="pc-links"><a class="pc-link" href="soapie-note.html">Open tool</a></div>
+              <span class="pc-live">live</span>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="pc-header">
+              <div class="pc-name-row">
+                <div class="pc-icon">💊</div>
+                <span class="pc-name">Drug Dosage Calculator</span>
+              </div>
+              <span class="pc-lang"><span class="lang-dot" style="background:var(--yellow)"></span>HTML/JS</span>
+            </div>
+            <p class="pc-desc">Four-in-one bedside dosage tool: basic dose, weight-based, IV concentration, and BSA (Mosteller) calculations — all with live formula breakdowns.</p>
+            <div class="pc-tags">
+              <span class="pc-tag">vanilla JS</span><span class="pc-tag">clinical math</span><span class="pc-tag">BSA</span><span class="pc-tag">mg/kg</span>
+            </div>
+            <div class="pc-footer">
+              <div class="pc-links">
+                <a class="pc-link" href="dosage-calc.html">Open tool</a>
+                <a class="pc-link" href="dosage-calc.html" target="_blank">New tab</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="pc-header">
+              <div class="pc-name-row">
+                <div class="pc-icon">⏱️</div>
+                <span class="pc-name">IV Drip Rate Calculator</span>
+              </div>
+              <span class="pc-lang"><span class="lang-dot" style="background:var(--blue)"></span>HTML/JS</span>
+            </div>
+            <p class="pc-desc">Flow rate, gtts/min (macro &amp; micro drop factors), infusion time, and mcg/kg/min → mL/hr for vasopressors and critical drips.</p>
+            <div class="pc-tags">
+              <span class="pc-tag">gtts/mL</span><span class="pc-tag">vasopressors</span><span class="pc-tag">pump math</span>
+            </div>
+            <div class="pc-footer">
+              <div class="pc-links">
+                <a class="pc-link" href="iv-drip.html">Open tool</a>
+                <a class="pc-link" href="iv-drip.html" target="_blank">New tab</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="pc-header">
+              <div class="pc-name-row">
+                <div class="pc-icon">🔬</div>
+                <span class="pc-name">Lab Values Reference</span>
+              </div>
+              <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
+            </div>
+            <p class="pc-desc">Quick-reference normal ranges for CBC, BMP, LFTs, ABGs and more — with plain-English explanations for nursing students.</p>
+            <div class="pc-tags">
+              <span class="pc-tag">CBC</span><span class="pc-tag">BMP</span><span class="pc-tag">ABG</span><span class="pc-tag">reference</span>
+            </div>
+            <div class="pc-footer">
+              <div class="pc-links">
+                <a class="pc-link" href="lab-values.html">Open tool</a>
+                <a class="pc-link" href="lab-values.html" target="_blank">New tab</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    </section>
+
   </div>
 </div>
-</section>
-
-<!-- PROJECTS -->
-<section id="projects">
-<div class="kitty-window" style="animation-delay:0.1s">
-  <div class="kitty-titlebar">
-    <div class="kitty-dots">
-      <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
-    </div>
-    <div class="kitty-tabs">
-      <div class="tab active"><span class="tab-icon">🗂️</span>projects/</div>
-      <div class="tab">ls -la</div>
-    </div>
-  </div>
-  <div class="kitty-body">
-    <p class="sec-comment">Healthcare tools, automation workflows & open source contributions</p>
-    <div class="prompt">
-      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
-      <span class="p-sep">:</span><span class="p-path">~/portfolio/projects</span>
-      <span class="p-arrow">❯</span>
-      <span class="p-cmd">ls</span><span class="p-flag">--color=auto</span>
-    </div>
-    <div class="output">
-
-      <!-- FORMS -->
-      <div class="projects-section-label" style="color:var(--purple)">📋 patient-forms/</div>
-      <div class="projects-grid">
-
-        <div class="project-card automation">
-          <div class="pc-header">
-            <span class="pc-name">🏥 Patient Intake Form</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
-          </div>
-          <p class="pc-desc">Full patient registration form — collects demographics, chief complaint, visit type, urgency level, allergies, medications, past medical history, and emergency contact. Triggers Zapier → Google Sheets + confirmation email.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">Google Sheets</span><span class="pc-tag">Gmail</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="https://docs.google.com/forms/d/e/1FAIpQLSdwxNJ8i7vTzPyjnT3z1FBvdEPMJ7RIrBU4Z9fslfwDrRkaVw/viewform?usp=header" target="_blank">[open form]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card automation">
-          <div class="pc-header">
-            <span class="pc-name">📅 Appointment Request</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--orange)"></span>Zapier</span>
-          </div>
-          <p class="pc-desc">Appointment request form with date/time slot picker, provider preference, visit type, and urgency. Triggers Zapier → queued in Google Sheets tracking sheet + auto-reply email with scheduling instructions.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">Zapier</span><span class="pc-tag">webhook</span><span class="pc-tag">auto-reply</span><span class="pc-tag">Google Sheets</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="https://docs.google.com/forms/d/e/1FAIpQLSe3lmNVFSZdaQIMQIOrphfSlhb19PjR6HNWNFlCOYNs5iFYBA/viewform?usp=header" target="_blank">[open form]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- CLINICAL TOOLS -->
-      <div class="projects-section-label" style="color:var(--blue); margin-top:28px">🩺 clinical-tools/</div>
-      <div class="projects-grid">
-
-        <div class="project-card">
-          <div class="pc-header">
-            <span class="pc-name">🧠 ABG + Electrolyte Interpreter</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
-          </div>
-          <p class="pc-desc">Clinical decision support for acid-base analysis. Input pH, PaCO₂, HCO₃, and electrolytes — get classification, compensation type, anion gap, and per-electrolyte imbalance hints with causes.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">ABG</span><span class="pc-tag">acid-base</span><span class="pc-tag">electrolytes</span><span class="pc-tag">anion gap</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="abg-interpreter.html">[open tool]</a>
-            <a class="pc-link" href="abg-interpreter.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
-            <span class="pc-name">📋 SOAPIE Note Builder + AI</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--green)"></span>Make / Gemini</span>
-          </div>
-          <p class="pc-desc">Structured SOAPIE note generator integrated with Gemini AI via a Make webhook — automatically generates and emails a complete clinical nursing note from input data. No manual formatting required.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">SOAPIE</span><span class="pc-tag">Gemini API</span><span class="pc-tag">Make webhook</span><span class="pc-tag">Gmail</span>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-            <div class="pc-links"><a class="pc-link" href="soapie-note.html">[open tool]</a></div>
-            <span class="pc-live">live</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
-            <span class="pc-name">💊 Drug Dosage Calculator</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--yellow)"></span>HTML/JS</span>
-          </div>
-          <p class="pc-desc">Four-in-one bedside dosage tool: basic dose, weight-based, IV concentration, and BSA (Mosteller) calculations — all with live formula breakdowns.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">vanilla JS</span><span class="pc-tag">clinical math</span><span class="pc-tag">BSA</span><span class="pc-tag">mg/kg</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="dosage-calc.html">[open tool]</a>
-            <a class="pc-link" href="dosage-calc.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
-            <span class="pc-name">⏱️ IV Drip Rate Calculator</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--blue)"></span>HTML/JS</span>
-          </div>
-          <p class="pc-desc">Flow rate, gtts/min (macro &amp; micro drop factors), infusion time, and mcg/kg/min → mL/hr for vasopressors and critical drips.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">gtts/mL</span><span class="pc-tag">vasopressors</span><span class="pc-tag">pump math</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="iv-drip.html">[open tool]</a>
-            <a class="pc-link" href="iv-drip.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
-            <span class="pc-name">💧 Fluid Balance Tracker</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--cyan)"></span>HTML/JS</span>
-          </div>
-          <p class="pc-desc">Shift-based I&amp;O chart with automatic net balance computation. Tracks oral, IV, and NGT intake vs. urine, wound, and other outputs — with hourly UO rate and fluid status alerts.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">I&amp;O Chart</span><span class="pc-tag">fluid balance</span><span class="pc-tag">ICU / ward</span><span class="pc-tag">UO rate</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="fluid-balance.html">[open tool]</a>
-            <a class="pc-link" href="fluid-balance.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="pc-header">
-            <span class="pc-name">🔬 Lab Values Reference</span>
-            <span class="pc-lang"><span class="lang-dot" style="background:var(--purple)"></span>HTML/JS</span>
-          </div>
-          <p class="pc-desc">Quick-reference normal ranges for CBC, BMP, LFTs, ABGs and more — with plain-English explanations for nursing students.</p>
-          <div class="pc-tags">
-            <span class="pc-tag">CBC</span><span class="pc-tag">BMP</span><span class="pc-tag">ABG</span><span class="pc-tag">reference</span>
-          </div>
-          <div class="pc-links">
-            <a class="pc-link" href="lab-values.html">[open tool]</a>
-            <a class="pc-link" href="lab-values.html" target="_blank">[new tab]</a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- SKILLS -->
-<section id="skills">
-<div class="kitty-window" style="animation-delay:0.2s">
-  <div class="kitty-titlebar">
-    <div class="kitty-dots">
-      <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
-    </div>
-    <div class="kitty-tabs">
-      <div class="tab active"><span class="tab-icon">⚙️</span>skills.conf</div>
-    </div>
-  </div>
-  <div class="kitty-body">
-    <p class="sec-comment">Technical &amp; clinical skill stack</p>
-    <div class="prompt">
-      <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
-      <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
-      <span class="p-arrow">❯</span>
-      <span class="p-cmd">cat</span><span class="p-arg">skills.conf</span>
-    </div>
-    <div class="output">
-      <div class="skills-grid">
-
-        <div class="skill-group">
-          <div class="sg-title" style="color:var(--pink)">🩺 Clinical</div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Patient Assessment</span><span class="sbr-pct">75%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:75%;background:var(--pink)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Medication Administration</span><span class="sbr-pct">72%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:72%;background:var(--pink)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Basic Nursing Foundations</span><span class="sbr-pct">78%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:78%;background:var(--pink)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Vital Signs Monitoring</span><span class="sbr-pct">80%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:80%;background:var(--pink)"></div></div>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="sg-title" style="color:var(--teal)">🤖 Health Tech / AI</div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Prompt Engineering</span><span class="sbr-pct">85%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:85%;background:var(--teal)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Healthcare Applications</span><span class="sbr-pct">75%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:75%;background:var(--teal)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Healthcare Data Concepts</span><span class="sbr-pct">55%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:55%;background:var(--teal)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Digital Health Systems</span><span class="sbr-pct">60%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:60%;background:var(--teal)"></div></div>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="sg-title" style="color:var(--yellow)">👩🏻‍💻 Virtual Assistance</div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Healthcare</span><span class="sbr-pct">78%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:78%;background:var(--yellow)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Customer Service</span><span class="sbr-pct">80%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:80%;background:var(--yellow)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Research & Analysis</span><span class="sbr-pct">80%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:80%;background:var(--yellow)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Documentation</span><span class="sbr-pct">72%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:72%;background:var(--yellow)"></div></div>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="sg-title" style="color:var(--purple)">🐧 Tools / Systems</div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Version Control</span><span class="sbr-pct">72%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:72%;background:var(--purple)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">API Integration</span><span class="sbr-pct">65%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:65%;background:var(--purple)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">CRM Administration</span><span class="sbr-pct">70%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:70%;background:var(--purple)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">VoIP & Call Handling</span><span class="sbr-pct">75%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:75%;background:var(--purple)"></div></div>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="sg-title" style="color:var(--orange)">🔄 No-Code Automation</div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Make</span><span class="sbr-pct">65%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:65%;background:var(--orange)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Zapier</span><span class="sbr-pct">60%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:60%;background:var(--orange)"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">n8n</span><span class="sbr-pct">55%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:55%;background:var(--orange)"></div></div>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="sg-title">🎨 <span style="background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Creative</span></div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Canva</span><span class="sbr-pct">80%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:80%;background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue))"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">CapCut</span><span class="sbr-pct">75%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:75%;background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue))"></div></div>
-          </div>
-          <div class="skill-bar-row">
-            <div class="sbr-top"><span class="sbr-name">Figma</span><span class="sbr-pct">30%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:30%;background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue))"></div></div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- CONTACT -->
-<section id="contact">
-  <div class="kitty-window" style="animation-delay:0.3s">
-    <div class="kitty-titlebar">
-      <div class="kitty-dots">
-        <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
-      </div>
-      <div class="kitty-tabs">
-        <div class="tab active"><span class="tab-icon">📡</span>contact.sh</div>
-      </div>
-    </div>
-    <div class="kitty-body">
-      <p class="sec-comment">Let's build something at the intersection of care &amp; code</p>
-      <div class="prompt">
-        <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
-        <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
-        <span class="p-arrow">❯</span>
-        <span class="p-cmd">./contact.sh</span><span class="p-flag">--send-message</span>
-      </div>
-      <div class="output">
-        <div class="contact-grid">
-          <div class="contact-form">
-            <div class="cf-title">send_message()</div>
-            <div class="cf-field">
-              <label class="cf-label">name</label>
-              <input class="cf-input" type="text" placeholder="your name" />
-            </div>
-            <div class="cf-field">
-              <label class="cf-label">email</label>
-              <input class="cf-input" type="email" placeholder="you@domain.com" />
-            </div>
-            <div class="cf-field">
-              <label class="cf-label">message</label>
-              <textarea class="cf-textarea" rows="4" placeholder="Hello, I wanted to reach out about..."></textarea>
-            </div>
-            <button class="cf-btn" id="contact-btn" onclick="submitContactForm()">
-              $ submit --message
-            </button>
-          </div>
-          <div class="contact-links">
-            <a class="cl-item" href="https://github.com/lucidxviii" target="_blank">
-              <span class="cl-icon">🐙</span>
-              <div><div class="cl-label">github</div><div class="cl-value">github.com/lucidxviii</div></div>
-            </a>
-            <a class="cl-item" href="https://linkedin.com/in/lucidxix" target="_blank">
-              <span class="cl-icon">💼</span>
-              <div><div class="cl-label">linkedin</div><div class="cl-value">linkedin.com/in/lucidxix</div></div>
-            </a>
-            <a class="cl-item" href="mailto:rivaslukethomas@gmail.com">
-              <span class="cl-icon">📧</span>
-              <div><div class="cl-label">email</div><div class="cl-value">rivaslukethomas@gmail.com</div></div>
-            </a>
-            <div class="cl-item" style="cursor:default">
-              <span class="cl-icon">📍</span>
-              <div><div class="cl-label">location</div><div class="cl-value">Bacolod City, Philippines</div></div>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:20px">
-          <div class="prompt">
-            <span class="p-user">nurse</span><span class="p-at">@</span><span class="p-host">arch</span>
-            <span class="p-sep">:</span><span class="p-path">~/portfolio</span>
-            <span class="p-arrow">❯</span>
-            <span class="p-cmd">echo</span><span class="p-arg">"thanks for visiting :3"</span>
-          </div>
-          <div style="color:var(--green);padding:6px 0 0 0;font-size:13px">thanks for visiting :3</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-</div>
-<script>
-async function submitContactForm() {
-  const name = document.querySelector('.cf-input[type="text"]').value.trim();
-  const email = document.querySelector('.cf-input[type="email"]').value.trim();
-  const message = document.querySelector('.cf-textarea').value.trim();
-  const btn = document.getElementById('contact-btn');
-
-  if (!name || !email || !message) {
-    btn.textContent = '✗ fill all fields';
-    setTimeout(() => btn.textContent = '$ submit --message', 2000);
-    return;
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    btn.textContent = '✗ invalid email';
-    setTimeout(() => btn.textContent = '$ submit --message', 2000);
-    return;
-  }
-
-  btn.textContent = '⟳ sending...';
-  btn.disabled = true;
-
-  try {
-    await fetch('https://hook.us2.make.com/0ywjh3ukhquh3scvcreg6kdswpa8q9vg', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message })
-    });
-    btn.textContent = '✓ sent!';
-  } catch {
-    btn.textContent = '✗ error — try again';
-    btn.disabled = false;
-  }
-}
-</script>
 </body>
 </html>
