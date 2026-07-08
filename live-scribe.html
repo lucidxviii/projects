@@ -343,6 +343,9 @@
     vitals: new Set()
   };
 
+  // Fields the user has manually edited — auto-extraction must not overwrite these
+  const userEditedFields = new Set();
+
   const EXTRACT_FIELDS = {
     chiefComplaint: 'extract-cc',
     symptoms: 'extract-symptoms',
@@ -596,7 +599,7 @@
 
   function mergeIntoField(fieldId, newValues) {
     const el = g(fieldId);
-    if (!el || !newValues.size) return;
+    if (!el || !newValues.size || userEditedFields.has(fieldId)) return;
     const existing = el.value.split(/[,;\n]+/).map(v => v.trim().toLowerCase()).filter(Boolean);
     const toAdd = [];
     newValues.forEach(val => {
@@ -787,24 +790,26 @@ Vitals: ${vitals || 'None detected'}
   }
 
   function sendToSoapieBuilder() {
-    const text = getTranscriptText();
     syncExtractionsFromFields();
     const ext = getExtractionValues();
-    if (!text && !ext.chiefComplaint && !ext.symptoms) {
+    const text = getTranscriptText();
+    if (!text && !ext.chiefComplaint && !ext.symptoms && !ext.medications && !ext.allergies && !ext.vitals) {
       showStatus('status-msg', 'error', '✗ No transcript or clinical data to send yet. Record or enter something first.');
       return;
     }
-    if (text) extractClinicalData(text);
-    const d = collectSessionData();
 
     const payload = {
-      patient: d.patient,
-      transcript: d.transcript,
-      chiefComplaint: ext.chiefComplaint || d.extractions.chiefComplaint.join(', '),
-      symptoms: ext.symptoms || d.extractions.symptoms.join(', '),
-      medications: ext.medications || d.extractions.medications.join(', '),
-      allergies: ext.allergies || d.extractions.allergies.join(', '),
-      vitals: ext.vitals ? ext.vitals.split(/[;\n]+/).map(v => v.trim()).filter(Boolean) : d.extractions.vitals
+      patient: {
+        initials: g('pt-init').value.trim(),
+        date: g('pt-date').value,
+        nurse: g('pt-rn').value.trim()
+      },
+      transcript: text,
+      chiefComplaint: ext.chiefComplaint,
+      symptoms: ext.symptoms,
+      medications: ext.medications,
+      allergies: ext.allergies,
+      vitals: ext.vitals ? ext.vitals.split(/[;\n]+/).map(v => v.trim()).filter(Boolean) : []
     };
 
     try {
@@ -825,6 +830,7 @@ Vitals: ${vitals || 'None detected'}
     g('pt-date').value = new Date().toISOString().split('T')[0];
     setTranscriptText('');
     Object.keys(extractions).forEach(k => extractions[k].clear());
+    userEditedFields.clear();
     Object.values(EXTRACT_FIELDS).forEach(id => { g(id).value = ''; });
     recState = 'idle';
     stopTimer(true);
@@ -850,6 +856,7 @@ Vitals: ${vitals || 'None detected'}
 
   Object.values(EXTRACT_FIELDS).forEach(id => {
     g(id).addEventListener('input', () => {
+      userEditedFields.add(id);
       syncExtractionsFromFields();
       scheduleAutosave();
     });
@@ -894,6 +901,9 @@ Vitals: ${vitals || 'None detected'}
       if (data.extractions) {
         setExtractionValues(data.extractions);
         syncExtractionsFromFields();
+        Object.values(EXTRACT_FIELDS).forEach(id => {
+          if (g(id).value.trim()) userEditedFields.add(id);
+        });
       }
 
       if (data.recording && data.recording.durationSeconds) {
