@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>~/tools — AI Clinical Scribe</title>
+<title>~/tools — Live Clinical Transcriber</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -56,13 +56,13 @@
   .panel-body{padding:26px;}
 
   .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .back-link,.icon-link{
+  .back-link{
     font-size:11.5px;font-weight:600;color:var(--white);
     background:var(--bg3);border:1px solid var(--border);
     padding:7px 15px;border-radius:999px;text-decoration:none;
     transition:all 0.15s;cursor:pointer;
   }
-  .back-link:hover,.icon-link:hover{color:var(--bg2);background:var(--purple);border-color:var(--purple);}
+  .back-link:hover{color:var(--bg2);background:var(--purple);border-color:var(--purple);}
 
   .group-label{
     font-size:10.5px;font-weight:700;text-transform:uppercase;
@@ -71,11 +71,20 @@
   }
   .group-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
+  .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+
   .ai-badge{
     display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;
     color:var(--teal);background:rgba(115,218,202,0.1);
     border:1px solid rgba(115,218,202,0.3);border-radius:999px;
-    padding:4px 12px;margin-bottom:16px;
+    padding:4px 12px;
+  }
+
+  .chrome-badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;
+    color:var(--yellow);background:rgba(224,175,104,0.12);
+    border:1px solid rgba(224,175,104,0.4);border-radius:999px;
+    padding:4px 12px;
   }
 
   /* patient info */
@@ -158,36 +167,6 @@
   .chip.chief-complaint{border-color:rgba(158,206,106,0.35);color:var(--green);background:rgba(158,206,106,0.08);}
   .chip-empty{font-size:10px;color:var(--subtle);font-style:italic;}
 
-  /* SOAPIE sections */
-  .soapie-badge{display:inline-flex;gap:4px;margin-bottom:16px;}
-  .badge-letter{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
-  .bl-s{background:rgba(247,118,142,0.18);color:var(--pink);}
-  .bl-o{background:rgba(122,162,247,0.18);color:var(--blue);}
-  .bl-a{background:rgba(158,206,106,0.18);color:var(--green);}
-  .bl-p{background:rgba(187,154,247,0.18);color:var(--purple);}
-  .bl-i{background:rgba(255,158,100,0.18);color:var(--orange);}
-  .bl-e{background:rgba(115,218,202,0.18);color:var(--teal);}
-
-  .soap-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;}
-  @media(max-width:640px){.soap-grid{grid-template-columns:1fr;}}
-
-  .soap-section{
-    background:var(--bg3);border:1px solid var(--border);border-radius:18px;
-    overflow:hidden;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;
-  }
-  .soap-section:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 10px 30px rgba(122,162,247,0.12);}
-  .soap-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
-  .soap-letter{font-size:16px;font-weight:700;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .soap-title{font-size:13px;font-weight:700;}
-  .soap-sub{font-size:11px;color:var(--subtle);font-weight:500;}
-  .soap-body{padding:16px;}
-  .s-letter{background:rgba(247,118,142,0.15);color:var(--pink);}
-  .o-letter{background:rgba(122,162,247,0.15);color:var(--blue);}
-  .a-letter{background:rgba(158,206,106,0.15);color:var(--green);}
-  .p-letter{background:rgba(187,154,247,0.15);color:var(--purple);}
-  .i-letter{background:rgba(255,158,100,0.15);color:var(--orange);}
-  .e-letter{background:rgba(115,218,202,0.15);color:var(--teal);}
-
   .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
   .btn{
     padding:10px 22px;border-radius:999px;border:none;
@@ -223,27 +202,6 @@
   .status-msg.error{background:rgba(247,118,142,0.08);border:1px solid rgba(247,118,142,0.2);color:var(--pink);}
   .status-msg.loading{background:rgba(115,218,202,0.08);border:1px solid rgba(115,218,202,0.2);color:var(--teal);}
 
-  /* webhook config panel */
-  .config-panel{display:none;}
-  .config-panel.show{display:block;animation:fadeSlide 0.3s ease both;}
-  .config-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:16px;}
-  .config-field{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:16px;}
-  .config-field label{margin-bottom:8px;display:block;}
-  .config-field input,.config-field textarea{width:100%;}
-  .config-field .hint{font-size:10.5px;color:var(--subtle);margin-top:6px;line-height:1.5;}
-  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-  .toggle{
-    width:38px;height:21px;border-radius:999px;background:var(--border);
-    position:relative;flex-shrink:0;cursor:pointer;transition:background 0.2s;
-  }
-  .toggle::after{
-    content:'';position:absolute;top:2px;left:2px;
-    width:17px;height:17px;border-radius:50%;background:var(--white);
-    transition:left 0.2s;
-  }
-  .toggle.on{background:var(--purple);}
-  .toggle.on::after{left:19px;background:var(--bg2);}
-
   .disclaimer{
     background:rgba(247,118,142,0.06);border:1px solid rgba(247,118,142,0.2);
     border-radius:14px;padding:14px 18px;font-size:11.5px;color:var(--subtle);
@@ -265,29 +223,26 @@
   <div class="panel">
     <div class="panel-header">
       <div>
-        <div class="panel-header-title"><span>🎙️</span> AI Clinical Scribe</div>
-        <div class="panel-header-sub">Live speech transcription with SOAPIE note generation</div>
+        <div class="panel-header-title"><span>🎙️</span> Live Clinical Transcriber</div>
+        <div class="panel-header-sub">Live speech transcription with clinical data extraction</div>
       </div>
       <div class="header-actions">
-        <button class="icon-link" id="config-toggle" type="button">⚙️ Webhook config</button>
         <a class="back-link" href="index.html">← Back to portfolio</a>
       </div>
     </div>
     <div class="panel-body">
 
-      <span class="ai-badge">✦ Browser speech recognition · Local autosave</span>
+      <div class="badge-row">
+        <span class="ai-badge">✦ Browser speech recognition · Local autosave</span>
+        <span class="chrome-badge">🌐 Chrome / Edge only — Web Speech API is not supported in Safari or Firefox</span>
+      </div>
 
       <!-- PATIENT INFO -->
       <div class="group-label">Patient Information</div>
       <div class="top-row">
         <div class="field"><label>patient initials</label><input id="pt-init" placeholder="J.D." /></div>
-        <div class="field"><label>MRN (optional)</label><input id="pt-mrn" placeholder="000000" /></div>
-        <div class="field"><label>age</label><input id="pt-age" type="number" placeholder="65" /></div>
-        <div class="field"><label>sex</label><select id="pt-sex"><option value="">--</option><option>M</option><option>F</option><option>NB</option></select></div>
         <div class="field"><label>date</label><input id="pt-date" type="date" /></div>
-        <div class="field"><label>room / unit</label><input id="pt-room" placeholder="4B-201" /></div>
-        <div class="field"><label>attending</label><input id="pt-md" placeholder="Dr. Smith" /></div>
-        <div class="field"><label>nurse</label><input id="pt-rn" placeholder="Your Name, SN" /></div>
+        <div class="field"><label>documented by</label><input id="pt-rn" placeholder="Your Name, SN" /></div>
       </div>
 
       <!-- RECORDING -->
@@ -314,7 +269,6 @@
         <button class="btn btn-secondary" id="btn-copy-transcript" type="button">📋 Copy transcript</button>
         <button class="btn btn-secondary" id="btn-export-md" type="button">📄 Export Markdown</button>
         <button class="btn btn-secondary" id="btn-export-txt" type="button">📝 Export Text</button>
-        <button class="btn btn-secondary" id="btn-populate-soapie" type="button">↻ Populate SOAPIE from transcript</button>
       </div>
 
       <!-- CLINICAL EXTRACTION -->
@@ -342,82 +296,8 @@
         </div>
       </div>
 
-      <!-- SOAPIE -->
-      <div class="group-label">SOAPIE Note</div>
-      <div class="soapie-badge">
-        <div class="badge-letter bl-s">S</div>
-        <div class="badge-letter bl-o">O</div>
-        <div class="badge-letter bl-a">A</div>
-        <div class="badge-letter bl-p">P</div>
-        <div class="badge-letter bl-i">I</div>
-        <div class="badge-letter bl-e">E</div>
-      </div>
-
-      <div class="soap-grid">
-        <div class="soap-section">
-          <div class="soap-header">
-            <div class="soap-letter s-letter">S</div>
-            <div><div class="soap-title" style="color:var(--pink)">Subjective</div><div class="soap-sub">patient's own words &amp; complaints</div></div>
-          </div>
-          <div class="soap-body">
-            <div class="field"><label>subjective notes</label><textarea id="soap-s" rows="5" placeholder="Chief complaint, history, patient statements…"></textarea></div>
-          </div>
-        </div>
-
-        <div class="soap-section">
-          <div class="soap-header">
-            <div class="soap-letter o-letter">O</div>
-            <div><div class="soap-title" style="color:var(--blue)">Objective</div><div class="soap-sub">measurable clinical findings</div></div>
-          </div>
-          <div class="soap-body">
-            <div class="field"><label>objective findings</label><textarea id="soap-o" rows="5" placeholder="Vitals, exam findings, lab values…"></textarea></div>
-          </div>
-        </div>
-
-        <div class="soap-section">
-          <div class="soap-header">
-            <div class="soap-letter a-letter">A</div>
-            <div><div class="soap-title" style="color:var(--green)">Assessment</div><div class="soap-sub">nursing diagnosis &amp; clinical impression</div></div>
-          </div>
-          <div class="soap-body">
-            <div class="field"><label>assessment</label><textarea id="soap-a" rows="5" placeholder="Nursing diagnoses, clinical impression…"></textarea></div>
-          </div>
-        </div>
-
-        <div class="soap-section">
-          <div class="soap-header">
-            <div class="soap-letter p-letter">P</div>
-            <div><div class="soap-title" style="color:var(--purple)">Plan</div><div class="soap-sub">intended interventions &amp; goals</div></div>
-          </div>
-          <div class="soap-body">
-            <div class="field"><label>plan</label><textarea id="soap-p" rows="5" placeholder="Interventions, orders, education plan…"></textarea></div>
-          </div>
-        </div>
-
-        <div class="soap-section">
-          <div class="soap-header">
-            <div class="soap-letter i-letter">I</div>
-            <div><div class="soap-title" style="color:var(--orange)">Implementation</div><div class="soap-sub">nursing actions carried out</div></div>
-          </div>
-          <div class="soap-body">
-            <div class="field"><label>implementation</label><textarea id="soap-i" rows="5" placeholder="Actions performed, times, procedures…"></textarea></div>
-          </div>
-        </div>
-
-        <div class="soap-section">
-          <div class="soap-header">
-            <div class="soap-letter e-letter">E</div>
-            <div><div class="soap-title" style="color:var(--teal)">Evaluation</div><div class="soap-sub">patient response to interventions</div></div>
-          </div>
-          <div class="soap-body">
-            <div class="field"><label>evaluation</label><textarea id="soap-e" rows="5" placeholder="Patient response, goal progress, follow-up…"></textarea></div>
-          </div>
-        </div>
-      </div>
-
       <div class="action-row">
-        <button class="btn btn-primary" id="btn-download-soapie" type="button">⬇ Download SOAPIE</button>
-        <button class="btn btn-ai" id="btn-send-webhook" type="button">✦ Send to Make.com</button>
+        <button class="btn btn-ai" id="btn-send-soapie" type="button">→ Send to SOAPIE Note Builder</button>
         <button class="btn btn-danger" id="btn-clear" type="button">🗑 Clear session</button>
       </div>
 
@@ -430,49 +310,6 @@
     </div>
   </div>
 
-  <!-- WEBHOOK CONFIG PANEL -->
-  <div class="panel config-panel" id="config-panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-header-title"><span>⚙️</span> Make.com Webhook Configuration</div>
-        <div class="panel-header-sub">Configure automation endpoint for AI-enhanced note delivery</div>
-      </div>
-      <button class="icon-link" id="config-close" type="button">✕ Close</button>
-    </div>
-    <div class="panel-body">
-      <div class="config-grid">
-        <div class="config-field">
-          <div class="toggle-row">
-            <label>Enable webhook integration</label>
-            <div class="toggle" id="webhook-enabled" role="switch" aria-checked="false" tabindex="0"></div>
-          </div>
-          <p class="hint">When enabled, the "Send to Make.com" button will POST session data to your webhook URL.</p>
-        </div>
-        <div class="config-field">
-          <label>Webhook URL</label>
-          <input id="webhook-url" type="url" placeholder="https://hook.us2.make.com/your-webhook-id" />
-          <p class="hint">Paste your Make.com custom webhook URL. Data is sent as JSON with patient info, transcript, extractions, and SOAPIE sections.</p>
-        </div>
-        <div class="config-field">
-          <label>Nurse email (optional — for AI note delivery)</label>
-          <input id="webhook-email" type="email" placeholder="nurse@email.com" />
-          <p class="hint">Included in webhook payload when sending to Make.com for email delivery via your scenario.</p>
-        </div>
-        <div class="config-field">
-          <label>Scenario name (reference only)</label>
-          <input id="webhook-scenario" type="text" placeholder="e.g. AI Scribe → Gemini → Gmail" />
-          <p class="hint">Label for your own reference. Not sent to the webhook.</p>
-        </div>
-      </div>
-      <div class="action-row">
-        <button class="btn btn-primary" id="btn-save-config" type="button">Save configuration</button>
-        <button class="btn btn-secondary" id="btn-test-webhook" type="button">Test webhook</button>
-        <button class="btn btn-danger" id="btn-reset-config" type="button">Reset to defaults</button>
-      </div>
-      <div class="status-msg" id="config-status"></div>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -480,8 +317,7 @@
   'use strict';
 
   const STORAGE_KEY = 'ai-scribe-session';
-  const CONFIG_KEY = 'ai-scribe-webhook-config';
-  const DEFAULT_WEBHOOK = 'https://hook.us2.make.com/bb4698gw6cv94h8iejghfwbzui8173ls';
+  const HANDOFF_KEY = 'scribe-to-soapie';
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -629,7 +465,7 @@
 
   function initRecognition() {
     if (!SpeechRecognition) {
-      showStatus('status-msg', 'error', '✗ Speech recognition is not supported in this browser. Try Chrome or Edge.');
+      showStatus('status-msg', 'error', '✗ Speech recognition is not supported in this browser. Please switch to Chrome or Edge.');
       g('btn-start').disabled = true;
       return;
     }
@@ -773,45 +609,11 @@
     });
   }
 
-  function populateSoapieFromTranscript() {
-    const text = getTranscriptText();
-    if (!text) {
-      showStatus('status-msg', 'error', '✗ No transcript to populate from.');
-      return;
-    }
-
-    extractClinicalData(text);
-
-    const cc = [...extractions.chiefComplaint].join(', ');
-    const symptoms = [...extractions.symptoms].join(', ');
-    const meds = [...extractions.medications].join(', ');
-    const allergies = [...extractions.allergies].join(', ');
-    const vitals = [...extractions.vitals].join('; ');
-
-    let subjective = '';
-    if (cc) subjective += `Chief Complaint: ${cc}\n`;
-    if (symptoms) subjective += `Symptoms: ${symptoms}\n`;
-    if (meds) subjective += `Medications mentioned: ${meds}\n`;
-    if (allergies) subjective += `Allergies: ${allergies}\n`;
-    subjective += `\nTranscript excerpt:\n${text}`;
-
-    if (!g('soap-s').value.trim()) g('soap-s').value = subjective.trim();
-    if (!g('soap-o').value.trim() && vitals) g('soap-o').value = `Vitals noted: ${vitals}`;
-
-    scheduleAutosave();
-    showStatus('status-msg', 'success', '✓ SOAPIE sections populated from transcript. Review and edit before saving.');
-  }
-
   function collectSessionData() {
     return {
       patient: {
         initials: g('pt-init').value.trim(),
-        mrn: g('pt-mrn').value.trim(),
-        age: g('pt-age').value.trim(),
-        sex: g('pt-sex').value,
         date: g('pt-date').value,
-        room: g('pt-room').value.trim(),
-        attending: g('pt-md').value.trim(),
         nurse: g('pt-rn').value.trim()
       },
       transcript: getTranscriptText(),
@@ -822,14 +624,6 @@
         allergies: [...extractions.allergies],
         vitals: [...extractions.vitals]
       },
-      soapie: {
-        subjective: g('soap-s').value.trim(),
-        objective: g('soap-o').value.trim(),
-        assessment: g('soap-a').value.trim(),
-        plan: g('soap-p').value.trim(),
-        implementation: g('soap-i').value.trim(),
-        evaluation: g('soap-e').value.trim()
-      },
       recording: {
         durationSeconds: timerSeconds,
         state: recState
@@ -838,17 +632,22 @@
     };
   }
 
-  function buildSoapieDocument(format) {
+  function buildTranscriptDocument(format) {
     const d = collectSessionData();
     const p = d.patient;
-    const s = d.soapie;
+    const cc = d.extractions.chiefComplaint.join(', ');
+    const symptoms = d.extractions.symptoms.join(', ');
+    const meds = d.extractions.medications.join(', ');
+    const allergies = d.extractions.allergies.join(', ');
+    const vitals = d.extractions.vitals.join('; ');
 
     if (format === 'markdown') {
-      return `# Nursing SOAPIE Note
+      return `# Clinical Transcript
 
-**Patient:** ${p.initials || '[Patient]'}${p.age ? ` | Age: ${p.age}` : ''}${p.sex ? ` | Sex: ${p.sex}` : ''}${p.mrn ? ` | MRN: ${p.mrn}` : ''}
-**Date:** ${p.date || new Date().toLocaleDateString()}${p.room ? ` | Room: ${p.room}` : ''}
-**Attending:** ${p.attending || '--'} | **Documented by:** ${p.nurse || '--'}
+**Patient:** ${p.initials || '[Patient]'}
+**Date:** ${p.date || new Date().toLocaleDateString()}
+**Documented by:** ${p.nurse || '--'}
+**Recording duration:** ${formatTimer(timerSeconds)}
 
 ---
 
@@ -857,36 +656,24 @@ ${d.transcript || '_No transcript recorded_'}
 
 ---
 
-## [S] Subjective
-${s.subjective || '_Not documented_'}
-
-## [O] Objective
-${s.objective || '_Not documented_'}
-
-## [A] Assessment
-${s.assessment || '_Not documented_'}
-
-## [P] Plan
-${s.plan || '_Not documented_'}
-
-## [I] Implementation
-${s.implementation || '_Not documented_'}
-
-## [E] Evaluation
-${s.evaluation || '_Not documented_'}
+## Clinical Extraction
+- **Chief complaint:** ${cc || '_None detected_'}
+- **Symptoms:** ${symptoms || '_None detected_'}
+- **Medications mentioned:** ${meds || '_None detected_'}
+- **Allergies:** ${allergies || '_None detected_'}
+- **Vitals:** ${vitals || '_None detected_'}
 
 ---
 
-> **EDUCATIONAL USE ONLY** — AI-generated content requires human review before clinical use.
-> Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocaleDateString()}`;
+> **EDUCATIONAL USE ONLY** — AI-assisted transcription and extraction require human review before clinical use.`;
     }
 
     return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-NURSING SOAPIE NOTE — AI CLINICAL SCRIBE
+CLINICAL TRANSCRIPT — LIVE CLINICAL TRANSCRIBER
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Patient: ${p.initials || '[Patient]'}${p.age ? ` | Age: ${p.age}` : ''}${p.sex ? ` | Sex: ${p.sex}` : ''}${p.mrn ? ` | MRN: ${p.mrn}` : ''}
-Date: ${p.date || new Date().toLocaleDateString()}${p.room ? ` | Room: ${p.room}` : ''}
-Attending: ${p.attending || '--'} | Documented by: ${p.nurse || '--'}
+Patient: ${p.initials || '[Patient]'}
+Date: ${p.date || new Date().toLocaleDateString()}
+Documented by: ${p.nurse || '--'}
 Recording duration: ${formatTimer(timerSeconds)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -894,33 +681,16 @@ TRANSCRIPT
 ──────────
 ${d.transcript || 'No transcript recorded'}
 
-[S] SUBJECTIVE
-──────────────
-${s.subjective || 'Not documented'}
-
-[O] OBJECTIVE
-──────────────
-${s.objective || 'Not documented'}
-
-[A] ASSESSMENT
-──────────────
-${s.assessment || 'Not documented'}
-
-[P] PLAN
-──────────────
-${s.plan || 'Not documented'}
-
-[I] IMPLEMENTATION
-──────────────────
-${s.implementation || 'Not documented'}
-
-[E] EVALUATION
-──────────────
-${s.evaluation || 'Not documented'}
+CLINICAL EXTRACTION
+────────────────────
+Chief complaint: ${cc || 'None detected'}
+Symptoms: ${symptoms || 'None detected'}
+Medications mentioned: ${meds || 'None detected'}
+Allergies: ${allergies || 'None detected'}
+Vitals: ${vitals || 'None detected'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocaleDateString()}
-[EDUCATIONAL USE ONLY — AI-GENERATED CONTENT REQUIRES HUMAN REVIEW]
+[EDUCATIONAL USE ONLY — REQUIRES HUMAN REVIEW]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
   }
 
@@ -950,22 +720,87 @@ Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocal
   }
 
   function exportMarkdown() {
-    const content = buildSoapieDocument('markdown');
+    const content = buildTranscriptDocument('markdown');
     const initials = g('pt-init').value.trim() || 'patient';
-    downloadFile(content, `soapie-${initials}-${Date.now()}.md`, 'text/markdown');
+    downloadFile(content, `transcript-${initials}-${Date.now()}.md`, 'text/markdown');
     showStatus('status-msg', 'success', '✓ Markdown file downloaded.');
   }
 
   function exportText() {
-    const content = buildSoapieDocument('text');
+    const content = buildTranscriptDocument('text');
     const initials = g('pt-init').value.trim() || 'patient';
-    downloadFile(content, `soapie-${initials}-${Date.now()}.txt`, 'text/plain');
+    downloadFile(content, `transcript-${initials}-${Date.now()}.txt`, 'text/plain');
     showStatus('status-msg', 'success', '✓ Text file downloaded.');
   }
 
-  function downloadSoapie() {
-    exportText();
+  function sendToSoapieBuilder() {
+    const text = getTranscriptText();
+    if (!text) {
+      showStatus('status-msg', 'error', '✗ No transcript to send yet. Record or type something first.');
+      return;
+    }
+    extractClinicalData(text);
+    const d = collectSessionData();
+
+    const payload = {
+      patient: d.patient,
+      transcript: d.transcript,
+      chiefComplaint: d.extractions.chiefComplaint.join(', '),
+      symptoms: d.extractions.symptoms.join(', '),
+      medications: d.extractions.medications.join(', '),
+      allergies: d.extractions.allergies.join(', '),
+      vitals: d.extractions.vitals
+    };
+
+    try {
+      localStorage.setItem(HANDOFF_KEY, JSON.stringify(payload));
+    } catch (_) {
+      showStatus('status-msg', 'error', '✗ Could not hand off data (local storage unavailable).');
+      return;
+    }
+
+    showStatus('status-msg', 'success', '✓ Sending transcript to the SOAPIE Note Builder…');
+    setTimeout(() => { window.location.href = 'soapie-note.html'; }, 500);
   }
+
+  function clearSession() {
+    if (!confirm('Clear all session data including the transcript and extracted data?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    document.querySelectorAll('input, textarea').forEach(el => { el.value = ''; });
+    g('pt-date').value = new Date().toISOString().split('T')[0];
+    setTranscriptText('');
+    Object.keys(extractions).forEach(k => extractions[k].clear());
+    renderChips('chips-cc', extractions.chiefComplaint, 'chief-complaint');
+    renderChips('chips-symptoms', extractions.symptoms, 'symptoms');
+    renderChips('chips-meds', extractions.medications, 'medications');
+    renderChips('chips-allergies', extractions.allergies, 'allergies');
+    renderChips('chips-vitals', extractions.vitals, 'vitals');
+    recState = 'idle';
+    stopTimer(true);
+    updateRecUI();
+    hideStatus('status-msg');
+    showStatus('status-msg', 'success', '✓ Session cleared.');
+  }
+
+  // Event listeners
+  g('btn-start').addEventListener('click', startRecording);
+  g('btn-pause').addEventListener('click', pauseRecording);
+  g('btn-resume').addEventListener('click', resumeRecording);
+  g('btn-stop').addEventListener('click', stopRecording);
+  g('btn-copy-transcript').addEventListener('click', copyTranscript);
+  g('btn-export-md').addEventListener('click', exportMarkdown);
+  g('btn-export-txt').addEventListener('click', exportText);
+  g('btn-send-soapie').addEventListener('click', sendToSoapieBuilder);
+  g('btn-clear').addEventListener('click', clearSession);
+
+  document.querySelectorAll('#pt-init,#pt-date,#pt-rn').forEach(el => {
+    el.addEventListener('input', scheduleAutosave);
+  });
+
+  g('transcript').addEventListener('input', () => {
+    extractClinicalData(getTranscriptText());
+    scheduleAutosave();
+  });
 
   let autosaveTimer = null;
   function scheduleAutosave() {
@@ -991,20 +826,12 @@ Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocal
 
       if (data.patient) {
         Object.entries(data.patient).forEach(([key, val]) => {
-          const map = { initials: 'pt-init', mrn: 'pt-mrn', age: 'pt-age', sex: 'pt-sex', date: 'pt-date', room: 'pt-room', attending: 'pt-md', nurse: 'pt-rn' };
+          const map = { initials: 'pt-init', date: 'pt-date', nurse: 'pt-rn' };
           if (map[key] && val) g(map[key]).value = val;
         });
       }
 
       if (data.transcript) setTranscriptText(data.transcript);
-      if (data.soapie) {
-        g('soap-s').value = data.soapie.subjective || '';
-        g('soap-o').value = data.soapie.objective || '';
-        g('soap-a').value = data.soapie.assessment || '';
-        g('soap-p').value = data.soapie.plan || '';
-        g('soap-i').value = data.soapie.implementation || '';
-        g('soap-e').value = data.soapie.evaluation || '';
-      }
 
       if (data.extractions) {
         Object.entries(data.extractions).forEach(([key, arr]) => {
@@ -1027,146 +854,9 @@ Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocal
     } catch (_) { /* ignore corrupt data */ }
   }
 
-  function clearSession() {
-    if (!confirm('Clear all session data including transcript and SOAPIE notes?')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    document.querySelectorAll('input, textarea').forEach(el => {
-      if (el.id !== 'webhook-url' && el.id !== 'webhook-email' && el.id !== 'webhook-scenario') el.value = '';
-    });
-    g('pt-sex').selectedIndex = 0;
-    g('pt-date').value = new Date().toISOString().split('T')[0];
-    setTranscriptText('');
-    Object.keys(extractions).forEach(k => extractions[k].clear());
-    renderChips('chips-cc', extractions.chiefComplaint, 'chief-complaint');
-    renderChips('chips-symptoms', extractions.symptoms, 'symptoms');
-    renderChips('chips-meds', extractions.medications, 'medications');
-    renderChips('chips-allergies', extractions.allergies, 'allergies');
-    renderChips('chips-vitals', extractions.vitals, 'vitals');
-    recState = 'idle';
-    stopTimer(true);
-    updateRecUI();
-    hideStatus('status-msg');
-    showStatus('status-msg', 'success', '✓ Session cleared.');
-  }
-
-  function getConfig() {
-    try {
-      const raw = localStorage.getItem(CONFIG_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (_) { /* fall through */ }
-    return { enabled: false, url: DEFAULT_WEBHOOK, email: '', scenario: '' };
-  }
-
-  function saveConfig() {
-    const config = {
-      enabled: g('webhook-enabled').classList.contains('on'),
-      url: g('webhook-url').value.trim() || DEFAULT_WEBHOOK,
-      email: g('webhook-email').value.trim(),
-      scenario: g('webhook-scenario').value.trim()
-    };
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-    showStatus('config-status', 'success', '✓ Webhook configuration saved.');
-  }
-
-  function loadConfig() {
-    const config = getConfig();
-    g('webhook-url').value = config.url || DEFAULT_WEBHOOK;
-    g('webhook-email').value = config.email || '';
-    g('webhook-scenario').value = config.scenario || '';
-    if (config.enabled) g('webhook-enabled').classList.add('on');
-  }
-
-  function resetConfig() {
-    localStorage.removeItem(CONFIG_KEY);
-    g('webhook-enabled').classList.remove('on');
-    g('webhook-url').value = DEFAULT_WEBHOOK;
-    g('webhook-email').value = '';
-    g('webhook-scenario').value = '';
-    showStatus('config-status', 'success', '✓ Configuration reset to defaults.');
-  }
-
-  async function sendWebhook(isTest) {
-    const config = getConfig();
-    if (!config.enabled && !isTest) {
-      showStatus('status-msg', 'error', '✗ Webhook is disabled. Open Webhook config to enable it.');
-      g('config-panel').classList.add('show');
-      return;
-    }
-
-    const url = g('webhook-url').value.trim() || config.url || DEFAULT_WEBHOOK;
-    if (!url) {
-      showStatus('status-msg', 'error', '✗ No webhook URL configured.');
-      return;
-    }
-
-    const payload = collectSessionData();
-    payload.email = g('webhook-email').value.trim() || config.email;
-    payload.test = isTest;
-
-    const statusEl = isTest ? 'config-status' : 'status-msg';
-    showStatus(statusEl, 'loading', '⟳ Sending to Make.com webhook…');
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        showStatus(statusEl, 'success', isTest ? '✓ Test webhook sent successfully!' : '✓ Session data sent to Make.com. Check your scenario for results.');
-      } else {
-        showStatus(statusEl, 'error', '✗ Webhook returned an error. Verify your Make.com scenario is active.');
-      }
-    } catch (_) {
-      showStatus(statusEl, 'error', '✗ Failed to reach webhook. Check URL and network connection.');
-    }
-  }
-
-  function toggleConfigPanel() {
-    g('config-panel').classList.toggle('show');
-  }
-
-  function toggleSwitch(el) {
-    el.classList.toggle('on');
-    el.setAttribute('aria-checked', el.classList.contains('on'));
-  }
-
-  // Event listeners
-  g('btn-start').addEventListener('click', startRecording);
-  g('btn-pause').addEventListener('click', pauseRecording);
-  g('btn-resume').addEventListener('click', resumeRecording);
-  g('btn-stop').addEventListener('click', stopRecording);
-  g('btn-copy-transcript').addEventListener('click', copyTranscript);
-  g('btn-export-md').addEventListener('click', exportMarkdown);
-  g('btn-export-txt').addEventListener('click', exportText);
-  g('btn-populate-soapie').addEventListener('click', populateSoapieFromTranscript);
-  g('btn-download-soapie').addEventListener('click', downloadSoapie);
-  g('btn-send-webhook').addEventListener('click', () => sendWebhook(false));
-  g('btn-clear').addEventListener('click', clearSession);
-  g('config-toggle').addEventListener('click', toggleConfigPanel);
-  g('config-close').addEventListener('click', toggleConfigPanel);
-  g('btn-save-config').addEventListener('click', saveConfig);
-  g('btn-test-webhook').addEventListener('click', () => sendWebhook(true));
-  g('btn-reset-config').addEventListener('click', resetConfig);
-  g('webhook-enabled').addEventListener('click', () => toggleSwitch(g('webhook-enabled')));
-  g('webhook-enabled').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSwitch(g('webhook-enabled')); }
-  });
-
-  document.querySelectorAll('#pt-init,#pt-mrn,#pt-age,#pt-sex,#pt-date,#pt-room,#pt-md,#pt-rn,#soap-s,#soap-o,#soap-a,#soap-p,#soap-i,#soap-e').forEach(el => {
-    el.addEventListener('input', scheduleAutosave);
-  });
-
-  g('transcript').addEventListener('input', () => {
-    extractClinicalData(getTranscriptText());
-    scheduleAutosave();
-  });
-
   // Init
   g('pt-date').value = new Date().toISOString().split('T')[0];
   initRecognition();
-  loadConfig();
   loadSession();
   updateRecUI();
 })();
