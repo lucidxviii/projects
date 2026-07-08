@@ -166,6 +166,14 @@
   .chip.vitals{border-color:rgba(125,207,255,0.35);color:var(--cyan);background:rgba(125,207,255,0.08);}
   .chip.chief-complaint{border-color:rgba(158,206,106,0.35);color:var(--green);background:rgba(158,206,106,0.08);}
   .chip-empty{font-size:10px;color:var(--subtle);font-style:italic;}
+  .extract-input{
+    width:100%;min-height:72px;resize:vertical;
+    background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+    padding:10px 11px;color:var(--text);font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;line-height:1.6;outline:none;transition:border-color 0.15s;
+  }
+  .extract-input:focus{border-color:var(--purple);}
+  .extract-input::placeholder{color:var(--subtle);font-style:italic;}
 
   .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
   .btn{
@@ -276,23 +284,23 @@
       <div class="extract-grid">
         <div class="extract-card">
           <div class="extract-title"><span class="dot dot-cc"></span> Chief Complaint</div>
-          <div class="chip-group" id="chips-cc"><span class="chip-empty">Listening…</span></div>
+          <textarea class="extract-input" id="extract-cc" placeholder="Auto-detected or type chief complaint…" rows="2"></textarea>
         </div>
         <div class="extract-card">
           <div class="extract-title"><span class="dot dot-symptoms"></span> Symptoms</div>
-          <div class="chip-group" id="chips-symptoms"><span class="chip-empty">None detected</span></div>
+          <textarea class="extract-input" id="extract-symptoms" placeholder="Auto-detected or type symptoms…" rows="2"></textarea>
         </div>
         <div class="extract-card">
           <div class="extract-title"><span class="dot dot-meds"></span> Medications</div>
-          <div class="chip-group" id="chips-meds"><span class="chip-empty">None detected</span></div>
+          <textarea class="extract-input" id="extract-meds" placeholder="Auto-detected or type medications…" rows="2"></textarea>
         </div>
         <div class="extract-card">
           <div class="extract-title"><span class="dot dot-allergies"></span> Allergies</div>
-          <div class="chip-group" id="chips-allergies"><span class="chip-empty">None detected</span></div>
+          <textarea class="extract-input" id="extract-allergies" placeholder="Auto-detected or type allergies…" rows="2"></textarea>
         </div>
         <div class="extract-card">
           <div class="extract-title"><span class="dot dot-vitals"></span> Vitals</div>
-          <div class="chip-group" id="chips-vitals"><span class="chip-empty">None detected</span></div>
+          <textarea class="extract-input" id="extract-vitals" placeholder="Auto-detected or type vitals…" rows="2"></textarea>
         </div>
       </div>
 
@@ -333,6 +341,14 @@
     medications: new Set(),
     allergies: new Set(),
     vitals: new Set()
+  };
+
+  const EXTRACT_FIELDS = {
+    chiefComplaint: 'extract-cc',
+    symptoms: 'extract-symptoms',
+    medications: 'extract-meds',
+    allergies: 'extract-allergies',
+    vitals: 'extract-vitals'
   };
 
   const symptomPatterns = [
@@ -438,6 +454,12 @@
     g('transcript').textContent = text;
   }
 
+  function commitInterimIfAny() {
+    if (interimSpan && interimSpan.textContent.trim()) {
+      appendFinalTranscript(interimSpan.textContent);
+    }
+  }
+
   function appendFinalTranscript(text) {
     const box = g('transcript');
     if (interimSpan && interimSpan.parentNode) {
@@ -447,6 +469,13 @@
     const trimmed = text.trim();
     if (!trimmed) return;
     const current = box.innerText.trim();
+    if (current.endsWith(trimmed)) {
+      if (interimSpan && interimSpan.parentNode) {
+        interimSpan.remove();
+        interimSpan = null;
+      }
+      return;
+    }
     box.textContent = current ? current + ' ' + trimmed : trimmed;
     extractClinicalData(getTranscriptText());
     scheduleAutosave();
@@ -500,6 +529,7 @@
     };
 
     recognition.onend = () => {
+      commitInterimIfAny();
       if (recState === 'recording') {
         try { recognition.start(); } catch (_) { /* restart */ }
       }
@@ -522,12 +552,9 @@
 
   function pauseRecording() {
     if (!recognition || recState !== 'recording') return;
-    recognition.stop();
     recState = 'paused';
+    recognition.stop();
     stopTimer(false);
-    if (interimSpan) {
-      appendFinalTranscript(interimSpan.textContent);
-    }
     updateRecUI();
     showStatus('status-msg', 'info', '⏸ Recording paused.');
   }
@@ -547,11 +574,8 @@
 
   function stopRecording() {
     if (!recognition) return;
-    recognition.stop();
-    if (interimSpan) {
-      appendFinalTranscript(interimSpan.textContent);
-    }
     recState = 'stopped';
+    recognition.stop();
     stopTimer(false);
     updateRecUI();
     showStatus('status-msg', 'success', '⏹ Recording stopped. Review and edit transcript below.');
@@ -568,6 +592,40 @@
       }
     });
     return found;
+  }
+
+  function mergeIntoField(fieldId, newValues) {
+    const el = g(fieldId);
+    if (!el || !newValues.size) return;
+    const existing = el.value.split(/[,;\n]+/).map(v => v.trim().toLowerCase()).filter(Boolean);
+    const toAdd = [];
+    newValues.forEach(val => {
+      const normalized = val.trim().toLowerCase();
+      if (normalized && !existing.includes(normalized)) {
+        toAdd.push(val.trim());
+        existing.push(normalized);
+      }
+    });
+    if (toAdd.length) {
+      el.value = el.value.trim() ? el.value.trim() + ', ' + toAdd.join(', ') : toAdd.join(', ');
+    }
+  }
+
+  function getExtractionValues() {
+    return {
+      chiefComplaint: g('extract-cc').value.trim(),
+      symptoms: g('extract-symptoms').value.trim(),
+      medications: g('extract-meds').value.trim(),
+      allergies: g('extract-allergies').value.trim(),
+      vitals: g('extract-vitals').value.trim()
+    };
+  }
+
+  function setExtractionValues(values) {
+    if (!values) return;
+    Object.entries(EXTRACT_FIELDS).forEach(([key, id]) => {
+      if (values[key] != null) g(id).value = Array.isArray(values[key]) ? values[key].join(', ') : values[key];
+    });
   }
 
   function extractClinicalData(text) {
@@ -587,29 +645,23 @@
       }
     });
 
-    renderChips('chips-cc', extractions.chiefComplaint, 'chief-complaint');
-    renderChips('chips-symptoms', extractions.symptoms, 'symptoms');
-    renderChips('chips-meds', extractions.medications, 'medications');
-    renderChips('chips-allergies', extractions.allergies, 'allergies');
-    renderChips('chips-vitals', extractions.vitals, 'vitals');
+    mergeIntoField('extract-cc', extractions.chiefComplaint);
+    mergeIntoField('extract-symptoms', extractions.symptoms);
+    mergeIntoField('extract-meds', extractions.medications);
+    mergeIntoField('extract-allergies', extractions.allergies);
+    mergeIntoField('extract-vitals', extractions.vitals);
   }
 
-  function renderChips(containerId, set, cls) {
-    const container = g(containerId);
-    container.innerHTML = '';
-    if (set.size === 0) {
-      container.innerHTML = '<span class="chip-empty">None detected</span>';
-      return;
-    }
-    set.forEach(val => {
-      const chip = document.createElement('span');
-      chip.className = `chip ${cls}`;
-      chip.textContent = val;
-      container.appendChild(chip);
+  function syncExtractionsFromFields() {
+    Object.entries(EXTRACT_FIELDS).forEach(([key, id]) => {
+      extractions[key].clear();
+      g(id).value.split(/[,;\n]+/).map(v => v.trim()).filter(Boolean).forEach(v => extractions[key].add(v));
     });
   }
 
   function collectSessionData() {
+    syncExtractionsFromFields();
+    const ext = getExtractionValues();
     return {
       patient: {
         initials: g('pt-init').value.trim(),
@@ -618,11 +670,11 @@
       },
       transcript: getTranscriptText(),
       extractions: {
-        chiefComplaint: [...extractions.chiefComplaint],
-        symptoms: [...extractions.symptoms],
-        medications: [...extractions.medications],
-        allergies: [...extractions.allergies],
-        vitals: [...extractions.vitals]
+        chiefComplaint: ext.chiefComplaint ? ext.chiefComplaint.split(/[,;\n]+/).map(v => v.trim()).filter(Boolean) : [],
+        symptoms: ext.symptoms ? ext.symptoms.split(/[,;\n]+/).map(v => v.trim()).filter(Boolean) : [],
+        medications: ext.medications ? ext.medications.split(/[,;\n]+/).map(v => v.trim()).filter(Boolean) : [],
+        allergies: ext.allergies ? ext.allergies.split(/[,;\n]+/).map(v => v.trim()).filter(Boolean) : [],
+        vitals: ext.vitals ? ext.vitals.split(/[;\n]+/).map(v => v.trim()).filter(Boolean) : []
       },
       recording: {
         durationSeconds: timerSeconds,
@@ -635,11 +687,12 @@
   function buildTranscriptDocument(format) {
     const d = collectSessionData();
     const p = d.patient;
-    const cc = d.extractions.chiefComplaint.join(', ');
-    const symptoms = d.extractions.symptoms.join(', ');
-    const meds = d.extractions.medications.join(', ');
-    const allergies = d.extractions.allergies.join(', ');
-    const vitals = d.extractions.vitals.join('; ');
+    const ext = getExtractionValues();
+    const cc = ext.chiefComplaint;
+    const symptoms = ext.symptoms;
+    const meds = ext.medications;
+    const allergies = ext.allergies;
+    const vitals = ext.vitals;
 
     if (format === 'markdown') {
       return `# Clinical Transcript
@@ -735,21 +788,23 @@ Vitals: ${vitals || 'None detected'}
 
   function sendToSoapieBuilder() {
     const text = getTranscriptText();
-    if (!text) {
-      showStatus('status-msg', 'error', '✗ No transcript to send yet. Record or type something first.');
+    syncExtractionsFromFields();
+    const ext = getExtractionValues();
+    if (!text && !ext.chiefComplaint && !ext.symptoms) {
+      showStatus('status-msg', 'error', '✗ No transcript or clinical data to send yet. Record or enter something first.');
       return;
     }
-    extractClinicalData(text);
+    if (text) extractClinicalData(text);
     const d = collectSessionData();
 
     const payload = {
       patient: d.patient,
       transcript: d.transcript,
-      chiefComplaint: d.extractions.chiefComplaint.join(', '),
-      symptoms: d.extractions.symptoms.join(', '),
-      medications: d.extractions.medications.join(', '),
-      allergies: d.extractions.allergies.join(', '),
-      vitals: d.extractions.vitals
+      chiefComplaint: ext.chiefComplaint || d.extractions.chiefComplaint.join(', '),
+      symptoms: ext.symptoms || d.extractions.symptoms.join(', '),
+      medications: ext.medications || d.extractions.medications.join(', '),
+      allergies: ext.allergies || d.extractions.allergies.join(', '),
+      vitals: ext.vitals ? ext.vitals.split(/[;\n]+/).map(v => v.trim()).filter(Boolean) : d.extractions.vitals
     };
 
     try {
@@ -770,11 +825,7 @@ Vitals: ${vitals || 'None detected'}
     g('pt-date').value = new Date().toISOString().split('T')[0];
     setTranscriptText('');
     Object.keys(extractions).forEach(k => extractions[k].clear());
-    renderChips('chips-cc', extractions.chiefComplaint, 'chief-complaint');
-    renderChips('chips-symptoms', extractions.symptoms, 'symptoms');
-    renderChips('chips-meds', extractions.medications, 'medications');
-    renderChips('chips-allergies', extractions.allergies, 'allergies');
-    renderChips('chips-vitals', extractions.vitals, 'vitals');
+    Object.values(EXTRACT_FIELDS).forEach(id => { g(id).value = ''; });
     recState = 'idle';
     stopTimer(true);
     updateRecUI();
@@ -795,6 +846,13 @@ Vitals: ${vitals || 'None detected'}
 
   document.querySelectorAll('#pt-init,#pt-date,#pt-rn').forEach(el => {
     el.addEventListener('input', scheduleAutosave);
+  });
+
+  Object.values(EXTRACT_FIELDS).forEach(id => {
+    g(id).addEventListener('input', () => {
+      syncExtractionsFromFields();
+      scheduleAutosave();
+    });
   });
 
   g('transcript').addEventListener('input', () => {
@@ -834,15 +892,8 @@ Vitals: ${vitals || 'None detected'}
       if (data.transcript) setTranscriptText(data.transcript);
 
       if (data.extractions) {
-        Object.entries(data.extractions).forEach(([key, arr]) => {
-          const map = { chiefComplaint: 'chiefComplaint', symptoms: 'symptoms', medications: 'medications', allergies: 'allergies', vitals: 'vitals' };
-          if (map[key] && Array.isArray(arr)) arr.forEach(v => extractions[map[key]].add(v));
-        });
-        renderChips('chips-cc', extractions.chiefComplaint, 'chief-complaint');
-        renderChips('chips-symptoms', extractions.symptoms, 'symptoms');
-        renderChips('chips-meds', extractions.medications, 'medications');
-        renderChips('chips-allergies', extractions.allergies, 'allergies');
-        renderChips('chips-vitals', extractions.vitals, 'vitals');
+        setExtractionValues(data.extractions);
+        syncExtractionsFromFields();
       }
 
       if (data.recording && data.recording.durationSeconds) {

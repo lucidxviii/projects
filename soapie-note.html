@@ -152,10 +152,55 @@
 
   .output-box{
     background:var(--bg3);border:1px solid var(--border);border-radius:16px;
-    padding:20px;margin-top:16px;display:none;white-space:pre-wrap;
-    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;color:var(--white);
+    padding:0;margin-top:16px;display:none;overflow:hidden;
   }
   .output-box.show{display:block;animation:fadeSlide 0.3s ease both;}
+  .output-actions{
+    display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;
+  }
+  .output-actions.hidden{display:none;}
+
+  .note-doc{padding:24px;font-family:'Inter',sans-serif;font-size:13.5px;line-height:1.75;color:var(--white);}
+  .note-doc-header{
+    padding-bottom:18px;margin-bottom:20px;border-bottom:1px solid var(--border);
+  }
+  .note-doc-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-0.02em;}
+  .note-doc-meta{font-size:12px;color:var(--subtle);line-height:1.8;}
+  .note-doc-meta strong{color:var(--white);font-weight:600;}
+
+  .note-block{
+    background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;margin-bottom:14px;
+  }
+  .note-block:last-of-type{margin-bottom:0;}
+  .note-block-header{
+    display:flex;align-items:center;gap:12px;margin-bottom:12px;
+    padding-bottom:10px;border-bottom:1px solid var(--border);
+  }
+  .note-block-letter{
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;
+    justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;
+  }
+  .note-block-title{font-size:16px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;}
+  .note-block-body{font-size:13px;line-height:1.8;color:var(--white);}
+  .note-block-body p{margin-bottom:8px;}
+  .note-block-body p:last-child{margin-bottom:0;}
+  .note-block-body ul{margin:6px 0 0 18px;}
+  .note-block-body li{margin-bottom:4px;}
+  .note-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--subtle);margin-bottom:2px;}
+
+  .note-footer{
+    margin-top:18px;padding-top:16px;border-top:1px solid var(--border);
+    font-size:11px;color:var(--subtle);line-height:1.7;
+  }
+  .note-footer strong{color:var(--pink);}
+
+  .import-banner{
+    display:none;margin-bottom:18px;padding:12px 16px;border-radius:12px;
+    background:rgba(158,206,106,0.08);border:1px solid rgba(158,206,106,0.25);
+    color:var(--green);font-size:12px;font-weight:600;
+  }
+  .import-banner.show{display:block;animation:fadeSlide 0.3s ease both;}
 
   .ai-status{margin-top:12px;font-size:11.5px;font-weight:500;padding:11px 16px;border-radius:12px;display:none;}
   .ai-status.loading{display:block;background:rgba(115,218,202,0.08);border:1px solid rgba(115,218,202,0.2);color:var(--teal);}
@@ -191,6 +236,7 @@
         <div class="badge-letter bl-e">E</div>
       </div>
       <span class="ai-badge">✦ Gemini AI enabled</span>
+      <div class="import-banner" id="import-banner">✓ Clinical data imported from Live Clinical Transcriber</div>
 
       <!-- PATIENT INFO -->
       <div class="group-label">Patient Information</div>
@@ -373,6 +419,11 @@
         <button class="btn btn-danger" onclick="clearAll()">🗑️ Clear all</button>
       </div>
 
+      <div class="output-actions hidden" id="output-actions">
+        <button class="btn btn-secondary" id="btn-download-txt" type="button" onclick="downloadNote('txt')">⬇ Download .txt</button>
+        <button class="btn btn-secondary" id="btn-download-md" type="button" onclick="downloadNote('md')">⬇ Download .md</button>
+      </div>
+
       <div class="ai-status" id="ai-status"></div>
       <div class="output-box" id="output"></div>
 
@@ -384,10 +435,12 @@
 </div>
 
 <script>
+const HANDOFF_KEY = 'scribe-to-soapie';
 document.getElementById('pt-date').value = new Date().toISOString().split('T')[0];
 
 let ccList=[], ndList=[], intList=[], implList=[], evalList=[];
 let appearList=[];
+let lastPlainNote = '';
 
 function toggleCC(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--pink)';el.style.borderColor='var(--pink)';el.style.color='var(--bg2)';ccList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';ccList=ccList.filter(v=>v!==val);}}
 function toggleND(el,val){el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--green)';el.style.borderColor='var(--green)';el.style.color='var(--bg2)';ndList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';ndList=ndList.filter(v=>v!==val);}}
@@ -397,6 +450,68 @@ function toggleEval(el,val){el.classList.toggle('active');if(el.classList.contai
 function toggleChip(el){const val=el.textContent;el.classList.toggle('active');if(el.classList.contains('active')){el.style.background='var(--blue)';el.style.borderColor='var(--blue)';el.style.color='var(--bg2)';appearList.push(val);}else{el.style.background='';el.style.borderColor='';el.style.color='';appearList=appearList.filter(v=>v!==val);}}
 
 function g(id){return document.getElementById(id).value.trim();}
+function setVal(id, val){ if (val != null && val !== '') document.getElementById(id).value = val; }
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function parseVitalsFromHandoff(vitals) {
+  const list = Array.isArray(vitals) ? vitals : String(vitals || '').split(/[;\n]+/);
+  list.forEach(entry => {
+    const text = String(entry).trim().toLowerCase();
+    if (!text) return;
+    const bp = text.match(/(?:blood pressure|bp)[:\s]*(\d{2,3}\s*\/\s*\d{2,3})/);
+    if (bp) setVal('o-bp', bp[1].replace(/\s/g, ''));
+    const hr = text.match(/(?:heart rate|hr)[:\s]*(\d{2,3})/);
+    if (hr) setVal('o-hr', hr[1]);
+    const rr = text.match(/(?:respiratory rate|rr)[:\s]*(\d{1,2})/);
+    if (rr) setVal('o-rr', rr[1]);
+    const temp = text.match(/(?:temp(?:erature)?)[:\s]*(\d{2,3}(?:\.\d)?)/);
+    if (temp) setVal('o-temp', temp[1]);
+    const spo2 = text.match(/(?:spo2|o2 sat(?:uration)?|oxygen saturation)[:\s]*(\d{2,3})/);
+    if (spo2) setVal('o-spo2', spo2[1]);
+    const pain = text.match(/(?:pain(?: score| level|rating)?)[:\s]*(\d{1,2})/);
+    if (pain) { setVal('o-pain', pain[1]); setVal('s-pain', pain[1]); }
+    if (/^\d{2,3}\s*\/\s*\d{2,3}$/.test(text)) setVal('o-bp', text.replace(/\s/g, ''));
+  });
+}
+
+function loadScribeHandoff() {
+  try {
+    const raw = localStorage.getItem(HANDOFF_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    localStorage.removeItem(HANDOFF_KEY);
+
+    if (data.patient) {
+      setVal('pt-init', data.patient.initials);
+      setVal('pt-date', data.patient.date);
+      setVal('pt-rn', data.patient.nurse);
+    }
+
+    if (data.chiefComplaint) setVal('s-cc', data.chiefComplaint);
+
+    const historyParts = [];
+    if (data.symptoms) historyParts.push(`Symptoms: ${data.symptoms}`);
+    if (data.medications) historyParts.push(`Medications: ${data.medications}`);
+    if (data.allergies) historyParts.push(`Allergies: ${data.allergies}`);
+    if (data.transcript) historyParts.push(`Transcript excerpt: ${data.transcript.slice(0, 500)}${data.transcript.length > 500 ? '…' : ''}`);
+    if (historyParts.length) {
+      const existing = g('s-hx');
+      setVal('s-hx', existing ? existing + '\n\n' + historyParts.join('\n') : historyParts.join('\n'));
+    }
+
+    if (data.vitals) parseVitalsFromHandoff(data.vitals);
+
+    document.getElementById('import-banner').classList.add('show');
+    showStatus('success', '✓ Transcript and clinical extraction loaded from Live Clinical Transcriber.');
+  } catch (_) { /* ignore corrupt handoff */ }
+}
 
 function validate() {
   const initials = g('pt-init');
@@ -457,9 +572,7 @@ function collectData() {
   };
 }
 
-function generateNote(){
-  if (!validate()) return;
-  const d = collectData();
+function buildNotePlainText(d) {
   const p = d.patient;
   const s = d.subjective;
   const o = d.objective;
@@ -468,59 +581,181 @@ function generateNote(){
   const i = d.implementation;
   const e = d.evaluation;
 
-  let note=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-NURSING SOAPIE NOTE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Patient: ${p.initials}${p.age?` | Age: ${p.age}`:''}${p.sex?` | Sex: ${p.sex}`:''}${p.mrn?` | MRN: ${p.mrn}`:''}
-Date: ${p.date||new Date().toLocaleDateString()}${p.room?` | Room: ${p.room}`:''}
-Attending: ${p.attending||'--'} | Documented by: ${p.nurse||'--'}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  return `NURSING SOAPIE NOTE
+
+Patient: ${p.initials}${p.age ? ` | Age: ${p.age}` : ''}${p.sex ? ` | Sex: ${p.sex}` : ''}${p.mrn ? ` | MRN: ${p.mrn}` : ''}
+Date: ${p.date || new Date().toLocaleDateString()}${p.room ? ` | Room: ${p.room}` : ''}
+Attending: ${p.attending || '--'} | Documented by: ${p.nurse || '--'}
 
 [S] SUBJECTIVE
-──────────────
-Chief Complaint: ${s.chiefComplaint||'Not documented'}
-${s.painScore?`Pain Score: ${s.painScore}/10\n`:''}${s.onset?`Onset/Duration: ${s.onset}\n`:''}${s.history?`History/Notes: ${s.history}\n`:''}
+Chief Complaint: ${s.chiefComplaint || 'Not documented'}
+${s.painScore ? `Pain Score: ${s.painScore}/10\n` : ''}${s.onset ? `Onset/Duration: ${s.onset}\n` : ''}${s.history ? `History/Notes: ${s.history}\n` : ''}
 [O] OBJECTIVE
-──────────────
 Vitals:
-  BP: ${o.bp||'--'} mmHg    HR: ${o.hr||'--'} bpm
-  RR: ${o.rr||'--'} br/min  Temp: ${o.temp||'--'}C
-  SpO2: ${o.spo2||'--'}%    Pain: ${o.painScore||'--'}/10
-${o.appearance?`\nGeneral Appearance: ${o.appearance}`:''}
-${o.exam?`\nExam/Labs: ${o.exam}`:''}
+  BP: ${o.bp || '--'} mmHg    HR: ${o.hr || '--'} bpm
+  RR: ${o.rr || '--'} br/min  Temp: ${o.temp || '--'}°C
+  SpO2: ${o.spo2 || '--'}%    Pain: ${o.painScore || '--'}/10
+${o.appearance ? `\nGeneral Appearance: ${o.appearance}` : ''}${o.exam ? `\nExam/Labs: ${o.exam}` : ''}
 
 [A] ASSESSMENT
-──────────────
-${a.diagnoses||'Nursing diagnosis not documented'}
-${a.notes?`\nNotes: ${a.notes}`:''}
+${a.diagnoses || 'Nursing diagnosis not documented'}${a.notes ? `\nNotes: ${a.notes}` : ''}
 
 [P] PLAN
-──────────────
 Planned Interventions:
-${pl.interventions.length?pl.interventions.map(i=>`  - ${i}`).join('\n'):'  - No plan documented'}
-${pl.education?`\nEducation Plan: ${pl.education}`:''}
+${pl.interventions.length ? pl.interventions.map(x => `  - ${x}`).join('\n') : '  - No plan documented'}${pl.education ? `\nEducation Plan: ${pl.education}` : ''}
 
 [I] IMPLEMENTATION
-──────────────────
 Actions Performed:
-${i.actions.length?i.actions.map(a=>`  - ${a}`).join('\n'):'  - No interventions documented'}
-${i.times?`\nKey Intervention Times: ${i.times}`:''}
+${i.actions.length ? i.actions.map(x => `  - ${x}`).join('\n') : '  - No interventions documented'}${i.times ? `\nKey Intervention Times: ${i.times}` : ''}
 
 [E] EVALUATION
-──────────────
 Patient Response:
-${e.responses.length?e.responses.map(r=>`  - ${r}`).join('\n'):'  - Evaluation not documented'}
-${e.painAfter?`\nPain Score Post-Intervention: ${e.painAfter}/10`:''}
-${e.followup?`\nFollow-up Plan: ${e.followup}`:''}
+${e.responses.length ? e.responses.map(x => `  - ${x}`).join('\n') : '  - Evaluation not documented'}${e.painAfter ? `\nPain Score Post-Intervention: ${e.painAfter}/10` : ''}${e.followup ? `\nFollow-up Plan: ${e.followup}` : ''}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Documented by: ${p.nurse||'[Nurse Name, SN]'} | ${p.date||new Date().toLocaleDateString()}
-[EDUCATIONAL USE ONLY -- NOT FOR ACTUAL PATIENT RECORDS]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocaleDateString()}
+[EDUCATIONAL USE ONLY — NOT FOR ACTUAL PATIENT RECORDS]`;
+}
 
-  const box=document.getElementById('output');
-  box.textContent=note;
+function buildNoteMarkdown(d) {
+  const p = d.patient;
+  const s = d.subjective;
+  const o = d.objective;
+  const a = d.assessment;
+  const pl = d.plan;
+  const i = d.implementation;
+  const e = d.evaluation;
+
+  return `# Nursing SOAPIE Note
+
+**Patient:** ${p.initials}${p.age ? ` | Age: ${p.age}` : ''}${p.sex ? ` | Sex: ${p.sex}` : ''}${p.mrn ? ` | MRN: ${p.mrn}` : ''}
+**Date:** ${p.date || new Date().toLocaleDateString()}${p.room ? ` | Room: ${p.room}` : ''}
+**Attending:** ${p.attending || '--'} | **Documented by:** ${p.nurse || '--'}
+
+## [S] Subjective
+- **Chief Complaint:** ${s.chiefComplaint || 'Not documented'}
+${s.painScore ? `- **Pain Score:** ${s.painScore}/10\n` : ''}${s.onset ? `- **Onset/Duration:** ${s.onset}\n` : ''}${s.history ? `- **History/Notes:** ${s.history}\n` : ''}
+## [O] Objective
+- **BP:** ${o.bp || '--'} mmHg | **HR:** ${o.hr || '--'} bpm | **RR:** ${o.rr || '--'} br/min
+- **Temp:** ${o.temp || '--'}°C | **SpO2:** ${o.spo2 || '--'}% | **Pain:** ${o.painScore || '--'}/10
+${o.appearance ? `- **General Appearance:** ${o.appearance}\n` : ''}${o.exam ? `- **Exam/Labs:** ${o.exam}\n` : ''}
+## [A] Assessment
+${a.diagnoses || 'Nursing diagnosis not documented'}${a.notes ? `\n\n${a.notes}` : ''}
+
+## [P] Plan
+${pl.interventions.length ? pl.interventions.map(x => `- ${x}`).join('\n') : '- No plan documented'}${pl.education ? `\n\n**Education Plan:** ${pl.education}` : ''}
+
+## [I] Implementation
+${i.actions.length ? i.actions.map(x => `- ${x}`).join('\n') : '- No interventions documented'}${i.times ? `\n\n**Key Intervention Times:** ${i.times}` : ''}
+
+## [E] Evaluation
+${e.responses.length ? e.responses.map(x => `- ${x}`).join('\n') : '- Evaluation not documented'}${e.painAfter ? `\n\n**Pain Score Post-Intervention:** ${e.painAfter}/10` : ''}${e.followup ? `\n\n**Follow-up Plan:** ${e.followup}` : ''}
+
+---
+*Documented by: ${p.nurse || '[Nurse Name, SN]'} | ${p.date || new Date().toLocaleDateString()}*
+*EDUCATIONAL USE ONLY — NOT FOR ACTUAL PATIENT RECORDS*`;
+}
+
+function buildNoteHtml(d) {
+  const p = d.patient;
+  const s = d.subjective;
+  const o = d.objective;
+  const a = d.assessment;
+  const pl = d.plan;
+  const i = d.implementation;
+  const e = d.evaluation;
+
+  const sections = [
+    {
+      letter: 'S', title: 'Subjective', color: 'var(--pink)', bg: 'rgba(247,118,142,0.15)',
+      body: `
+        <p><span class="note-label">Chief Complaint</span><br>${escapeHtml(s.chiefComplaint || 'Not documented')}</p>
+        ${s.painScore ? `<p><span class="note-label">Pain Score</span><br>${escapeHtml(s.painScore)}/10</p>` : ''}
+        ${s.onset ? `<p><span class="note-label">Onset / Duration</span><br>${escapeHtml(s.onset)}</p>` : ''}
+        ${s.history ? `<p><span class="note-label">History / Notes</span><br>${escapeHtml(s.history).replace(/\n/g, '<br>')}</p>` : ''}`
+    },
+    {
+      letter: 'O', title: 'Objective', color: 'var(--blue)', bg: 'rgba(122,162,247,0.15)',
+      body: `
+        <p><span class="note-label">Vitals</span><br>
+          BP: ${escapeHtml(o.bp || '--')} mmHg &nbsp;·&nbsp; HR: ${escapeHtml(o.hr || '--')} bpm<br>
+          RR: ${escapeHtml(o.rr || '--')} br/min &nbsp;·&nbsp; Temp: ${escapeHtml(o.temp || '--')}°C<br>
+          SpO2: ${escapeHtml(o.spo2 || '--')}% &nbsp;·&nbsp; Pain: ${escapeHtml(o.painScore || '--')}/10
+        </p>
+        ${o.appearance ? `<p><span class="note-label">General Appearance</span><br>${escapeHtml(o.appearance)}</p>` : ''}
+        ${o.exam ? `<p><span class="note-label">Exam / Labs</span><br>${escapeHtml(o.exam).replace(/\n/g, '<br>')}</p>` : ''}`
+    },
+    {
+      letter: 'A', title: 'Assessment', color: 'var(--green)', bg: 'rgba(158,206,106,0.15)',
+      body: `
+        <p>${escapeHtml(a.diagnoses || 'Nursing diagnosis not documented')}</p>
+        ${a.notes ? `<p><span class="note-label">Notes</span><br>${escapeHtml(a.notes).replace(/\n/g, '<br>')}</p>` : ''}`
+    },
+    {
+      letter: 'P', title: 'Plan', color: 'var(--purple)', bg: 'rgba(187,154,247,0.15)',
+      body: `
+        <p><span class="note-label">Planned Interventions</span></p>
+        ${pl.interventions.length ? `<ul>${pl.interventions.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>` : '<p>No plan documented</p>'}
+        ${pl.education ? `<p><span class="note-label">Education Plan</span><br>${escapeHtml(pl.education).replace(/\n/g, '<br>')}</p>` : ''}`
+    },
+    {
+      letter: 'I', title: 'Implementation', color: 'var(--orange)', bg: 'rgba(255,158,100,0.15)',
+      body: `
+        <p><span class="note-label">Actions Performed</span></p>
+        ${i.actions.length ? `<ul>${i.actions.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>` : '<p>No interventions documented</p>'}
+        ${i.times ? `<p><span class="note-label">Key Intervention Times</span><br>${escapeHtml(i.times)}</p>` : ''}`
+    },
+    {
+      letter: 'E', title: 'Evaluation', color: 'var(--teal)', bg: 'rgba(115,218,202,0.15)',
+      body: `
+        <p><span class="note-label">Patient Response</span></p>
+        ${e.responses.length ? `<ul>${e.responses.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>` : '<p>Evaluation not documented</p>'}
+        ${e.painAfter ? `<p><span class="note-label">Pain Score Post-Intervention</span><br>${escapeHtml(e.painAfter)}/10</p>` : ''}
+        ${e.followup ? `<p><span class="note-label">Follow-up Plan</span><br>${escapeHtml(e.followup).replace(/\n/g, '<br>')}</p>` : ''}`
+    }
+  ];
+
+  const meta = [
+    `<strong>Patient:</strong> ${escapeHtml(p.initials)}`,
+    p.age ? `<strong>Age:</strong> ${escapeHtml(p.age)}` : '',
+    p.sex ? `<strong>Sex:</strong> ${escapeHtml(p.sex)}` : '',
+    p.mrn ? `<strong>MRN:</strong> ${escapeHtml(p.mrn)}` : '',
+    `<strong>Date:</strong> ${escapeHtml(p.date || new Date().toLocaleDateString())}`,
+    p.room ? `<strong>Room:</strong> ${escapeHtml(p.room)}` : '',
+    `<strong>Attending:</strong> ${escapeHtml(p.attending || '--')}`,
+    `<strong>Documented by:</strong> ${escapeHtml(p.nurse || '--')}`
+  ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+
+  return `
+    <div class="note-doc">
+      <div class="note-doc-header">
+        <div class="note-doc-title">Nursing SOAPIE Note</div>
+        <div class="note-doc-meta">${meta}</div>
+      </div>
+      ${sections.map(sec => `
+        <div class="note-block">
+          <div class="note-block-header">
+            <div class="note-block-letter" style="background:${sec.bg};color:${sec.color}">${sec.letter}</div>
+            <div class="note-block-title" style="color:${sec.color}">[${sec.letter}] ${sec.title}</div>
+          </div>
+          <div class="note-block-body">${sec.body}</div>
+        </div>
+      `).join('')}
+      <div class="note-footer">
+        Documented by: ${escapeHtml(p.nurse || '[Nurse Name, SN]')} · ${escapeHtml(p.date || new Date().toLocaleDateString())}<br>
+        <strong>Educational use only — not for actual patient records.</strong>
+      </div>
+    </div>`;
+}
+
+function generateNote(){
+  if (!validate()) return;
+  const d = collectData();
+  lastPlainNote = buildNotePlainText(d);
+
+  const box = document.getElementById('output');
+  box.innerHTML = buildNoteHtml(d);
   box.classList.add('show');
+  document.getElementById('output-actions').classList.remove('hidden');
   box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -567,12 +802,37 @@ function showStatus(type, msg) {
 
 function copyNote(){
   const box=document.getElementById('output');
-  if(!box.textContent){generateNote();}
-  navigator.clipboard.writeText(box.textContent).then(()=>{
-    const btn=document.querySelector('.btn-secondary');
+  if(!lastPlainNote){generateNote();}
+  navigator.clipboard.writeText(lastPlainNote).then(()=>{
+    const btn=document.querySelector('.action-row .btn-secondary');
     btn.textContent='✓ Copied!';
     setTimeout(()=>btn.textContent='📋 Copy to clipboard',2000);
   });
+}
+
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadNote(format) {
+  if (!lastPlainNote) generateNote();
+  const d = collectData();
+  const initials = g('pt-init') || 'patient';
+  const stamp = Date.now();
+  if (format === 'md') {
+    downloadFile(buildNoteMarkdown(d), `soapie-${initials}-${stamp}.md`, 'text/markdown');
+  } else {
+    downloadFile(lastPlainNote, `soapie-${initials}-${stamp}.txt`, 'text/plain');
+  }
+  showStatus('success', `✓ SOAPIE note downloaded as .${format === 'md' ? 'md' : 'txt'}`);
 }
 
 function clearAll(){
@@ -580,12 +840,17 @@ function clearAll(){
   document.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
   document.querySelectorAll('.chip.active').forEach(el=>{el.classList.remove('active');el.style.background='';el.style.borderColor='';el.style.color='';});
   ccList=[];ndList=[];intList=[];implList=[];evalList=[];appearList=[];
+  lastPlainNote = '';
   document.getElementById('output').classList.remove('show');
-  document.getElementById('output').textContent='';
+  document.getElementById('output').innerHTML='';
+  document.getElementById('output-actions').classList.add('hidden');
+  document.getElementById('import-banner').classList.remove('show');
   document.getElementById('ai-status').className='ai-status';
   document.getElementById('ai-status').textContent='';
   document.getElementById('pt-date').value=new Date().toISOString().split('T')[0];
 }
+
+loadScribeHandoff();
 </script>
 </body>
 </html>
